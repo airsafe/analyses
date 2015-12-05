@@ -1,0 +1,381 @@
+---
+title: 'Patterns of laser strikes on US aircraft: 2010 to 2014'
+author: "Todd Curtis"
+date: "December 5, 2015"
+output: html_document
+---
+
+###Summary###
+A review of four years of reports (2010-2014) compiled by the Federal Aviation Administration (FAA) concerning unauthorized laser illuminations of aircraft in the US revealed a number of patterns about the extent of these encounters:
+
+- There were a total of 17,663 records of laser encounters for the years 2010-2014 that included information about the location of the encounter.
+
+- Over that five-year span, on any given day in the United States, there is a 99.6% chance that at least one aircraft will have a potentially dangerous encounter with a laser beam.
+
+- There were an average of 9.67 laser encounters per day. The most strikes in one day was 35, and there were no laser encounters on only eight days during that five-year period.
+
+- Laser events were not uniformly distributed by time period, with laser encounters more likely on Friday and Saturday, during the months of July through November, and from 0000-0500 hours UTC.
+
+- Comparing the proportion of air traffic in six selected metropolitan areas with the proportion of laser encounters in those areas, the proportion of laser encounters were much higher than the proportion of air traffic in the Phoenix, Los Angeles, and San Francisco areas, much lower in the Atlanta area, and about the same in the Chicago and New York metropolitan areas.
+
+###Background###
+In the US, the Federal Aviation Administration has long recognized that unauthorized laser illuminations of aircraft may have numerous hazardous effects on aircrew, including distraction, glare, afterimage, flash blindness, and, in extreme circumstances, persistent or permanent visual impairment ([FAA Advisory Circular 70-2A](http://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_70-2A_.pdf)). 
+
+As part of their effort to deal with the hazards posed by lasers, the FAA has encouraged air crew members, air traffic controllers, and the general public to submit reports of aircraft being illuminated by lasers. The FAA has collected this kind of data since at least 2004, and in 2011 published a study ([Report DOT/FAA/AM-11/7](https://www.faa.gov/data_research/research/med_humanfacs/oamtechreports/2010s/media/201107.pdf)) about 2,492 laser events that occurred in the US from 2004-2008 that characterized the patterns of exposure by their likelihood of occurrence by time of day and time of year.
+
+Since 2008, the FAA has received substantially more reports. The FAA's Laser News, Laws, & Civil Penalties page at https://www.faa.gov/about/initiatives/lasers/laws/ provides a link to an Excel file with five years of data covering 2010-2014. The data in this latter five-year period  covered 17,663 laser events, more than seven times the number of events from the 2011 study.
+
+###Methods###
+After downloading the data and removing records that did not contain sufficient information on the location of the laser encounter, the data was processed in order to summarize the likelihood of a laser encounter on any particular day during the study, the average number of encounters and the distribution of the number of encounters per day. In addition, the data was analyzed to determine the general pattern of strikes by time of day, day of the week, and month of the year. Heat maps were used to help illustrate these relationships.
+
+####Laser encounter data preparation####
+The raw laser encounter data was included in an Excel file with each sheet containing information for one calendar year. The various sheets were combined into one sheet with all 17,633 events, and saved as a CSV file. There were several variables included for each record, including the following:
+
+- Date
+- Time (UTC)
+- Location (IATA or ICAO code)
+- City
+- State
+- Aircraft ID
+- Number of aircraft
+- Aircraft type
+- Laser Color
+- Injury
+
+In this analysis, only the first five variables were used.  
+
+The raw data file from the FAA contained numerous cases of incorrect data with respect to location (airport, city, and state), including misspellings and capitalization errors,as well as missing data. The events were manually reviewed to correct these errors when sufficient information was contained in the rest of the record.
+
+Also, for consistency, locations were identified using the three-character IATA codes when they were available for an airport. If a VOR identifier was used as the location, the code for the nearest airport was used instead. Where IATA codes were not available, ICAO codes were used.
+
+This data is made available at the AirSafe.com address http://www.airsafe.com/analyze/faa_laser_data.csv
+
+```{r, echo=FALSE}
+
+# First, ensure we have the packages we need
+
+if (!require("downloader")){ 
+      install.packages("downloader") 
+} 
+library(downloader) 
+
+# Data file was located at FAA page "Laser News, Laws, & Civil
+# Penalties" page at https://www.faa.gov/about/initiatives/lasers/laws/
+
+# Original data is at https://www.faa.gov/about/initiatives/lasers/laws/laser_incidents_2010-2014.xls
+
+# Converted to a CSV file and can be downloaded from AirSafe.com 
+url <- "http://www.airsafe.com/analyze/faa_laser_data.csv"
+filename <- "faa_laser_data.csv" 
+download(url, destfile=filename)
+
+# Searched for airport codes using:
+#       - World Airport Codes - https://www.world-airport-codes.com/
+#       - Nations online - http://www.nationsonline.org/oneworld/IATA_Codes/airport_code_list.htm
+#       - Locations identifier search tool - https://nfdc.faa.gov/xwiki/bin/view/NFDC/Location+Identifiers+Search+Tool
+#       - AirNav.com - https://www.airnav.com/airports/
+
+# Raw data included are all 50 states, the District of Columbia, and Puerto Rico, and several US territories.
+
+# Input raw file
+laserhits = NULL
+laserhits.raw = NULL
+laserhits.raw = read.csv("faa_laser_data.csv")
+laserhits=laserhits.raw
+
+```
+
+####Laser encounter data cleaning###
+Records with an unknown value for location (City, State, or Airport) or for the time of day (Hour) were eliminated  from further analysis. 
+```{r, echo=FALSE}
+
+# DATA CLEANING: Removal of unknown location (City, State, or Airport) and time of day (Hour) from further analysis
+laserhits = subset(laserhits.raw, City!="UNKN"  & State!="UNKN" &  Airport!="UNKN"  & Hour!="UNKN" )
+
+```
+
+Once the revisions were complete, a total of `r nrow(laserhits.raw)-nrow(laserhits)` of the original `r format(nrow(laserhits.raw), digits=5, big.mark = ",")` records were eliminated from analysis due to unknown values for location or time of occurrence.
+
+Further processing changed the UTC times to an integer from zero to 23 to coincide with the hour of occurrence. Additional variables were added for the day of the week and the month corresponding to the date.
+
+Before evaluating laser encounters by city, airport, and state, steps were taken to ensure uniformity, including eliminating unnecessary leading and trailing space characters from the values for the  variables.
+
+Dates in the FAA data were in form 5-Jan-06, and were convert to the date format of yyyy-mm-dd. The converted dates were used to create two additional variables based on the date, the day of the week and, the month of the year, to ensure proper ordering, the two new variables were made into factors and ordered as they would be in a calendar.
+
+```{r, echo=FALSE}
+
+# FUNCTION FOR REMOVING LEADING AND TRAILING SPACES AND NON-PRINTING CHARACTERS
+
+# Function 'stripper' definition
+# This function removes leading and trailing spaces from a vector.
+# The first step is to ensure the vector 'x' is character type by using 'as.character()' function.
+# The next step is to remove the leading space characters, including leading tab, 
+#       newline, vertical tab, form feed, carriage return, and space:
+# 
+#      - x = sub("^[[:space:]]+", "", x) 
+#
+# Trailing spaces can be removed in a simlar fashion:
+#      - str = sub("[[:space:]]+$", "", str)
+#      
+# Notes:
+#      - The "$" character is the end of string character, "^"is beginning of string character
+#      - Note that without the "+", only the first instance would be removed
+
+stripper <- function(x){
+        x = as.character(x)
+        x = sub("[[:space:]]+$", "", x) # Remove leading space characters
+        x = sub("^[[:space:]]+", "", x) # Remove trailing space characters
+        return(x)
+}
+
+# Remove leading and trailing space characters from selected variables.
+laserhits$Injury = stripper(laserhits$Injury) # Injury variable
+laserhits$State = stripper(laserhits$State)
+laserhits$City = stripper(laserhits$City)
+laserhits$Airport = stripper(laserhits$Airport)
+
+# DATA CLEANING: Date conversion
+# Dates are in form 5-Jan-06, must convert to a date format of yyyy-mm-dd
+laserhits$Date = as.Date(laserhits$Date, "%d-%b-%y")
+
+# DATA CONVERSION: create new columns for year, month, and day
+laserhits$Year = format(laserhits$Date, "%Y")
+laserhits$Month = months(laserhits$Date, abbreviate = TRUE)
+laserhits$Day = format(laserhits$Date, "%d")
+laserhits$Weekday = weekdays(laserhits$Date, abbreviate = TRUE)
+
+# DATA CONVERSION: Ensure variable Hour is a numeric value, and converter to 24 numeric levels
+
+# Because the hour values were originally in a four-digit convfiguration before converting
+#     spreadsheet to CSV and then data.frame, the times before 1000 hours are
+#     fewer than four digits. Since this analysis is concerned only in the hour interval of a laser encounter,
+#     will convert the times into a number from 0 to 23, then turn that into a factor.
+
+laserhits$Hour = as.numeric(as.character(laserhits$Hour))
+laserhits$Hour = floor(laserhits$Hour/100)
+
+# DATA CONVERSION: Ordering days of the week and months of the year 
+
+# Make months and days of the week factors and order them as they are in a calendar
+laserhits$Month = factor(laserhits$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
+                                                  "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
+
+
+laserhits$Weekday = factor(laserhits$Weekday,levels=c("Sun","Mon","Tue",
+                                                      "Wed","Thu","Fri","Sat"), ordered=TRUE)
+```
+
+####Quick summary of the data####
+
+- From 2010 to 2014, there were `r format(nrow(laserhits), digits=5, big.mark = ",")` encounters where a laser beam affected one or more aircraft at or near at least `r format(length(table(laserhits$Airport)), digits=4, big.mark = ",")`  unique airports or other locations.
+
+- During this five-year period, there was an average of `r format(nrow(laserhits)/1827, digits=3)` laser encounters per day, with as many as `r max(table(laserhits$Date))` strikes in a single day. The median number of daily laser encounters was `r median(table(laserhits$Date)[[1]])`.
+
+- There were only `r sum(1827-nrow(laserhits))` days over these five years with no reported laser strikes on aircraft in the United States. In other words, on any given day in the United States, there was a `r format((nrow(laserhits)/1827)*100, digits=3)`% chance that at least one aircraft will have a potentially dangerous encounter with a laser beam.
+
+Below is a table and a histogram illustrating the distribution of the number of laser encounter reports in a day. 
+
+```{r, echo=FALSE}
+
+# Create a complete table and histogram of days with x-amount of strike events
+#  by adding a vector of zero values equal to the number of days with no strikes
+daily.strikes=c(rep(0,1827-length(table(laserhits$Date))),as.data.frame(table(laserhits$Date))[,2])
+
+# Note that adding 0.001 to the vector of values helps to align the axes with
+# the hourly range of encounter
+hist(daily.strikes+0.5, main="Distribution of number of laser encounters in a day",
+     xlab="Number of strikes in a day", breaks = seq(-1,36,by=1), xlim=c(-1,40), 
+     include.lowest=TRUE, col="dodgerblue")
+
+summary(daily.strikes)
+
+```
+
+The following histograms illustrate the distribution of encounters by days of the week and months of the year respectively.
+
+```{r, echo=FALSE}
+plot(laserhits$Weekday, main="Distribution of number of laser encounters by day of the week",
+     ylab = "Number of encounters", xlab="Day of the week", col="dodgerblue")
+
+
+plot(laserhits$Month, main="Distribution of number of laser encounters by month of the year",
+     ylab = "Number of encounters", xlab="Month of the year", col="dodgerblue")
+
+```
+
+A chi-square test was used to test the null hypothesis that the laser strikes were uniformly distributed by the day of the week or the month of the year. The null hypothesis was rejected in both cases because the p-value was much less than 0.05, specifically, `r format(chisq.test(table(laserhits$Weekday))[[3]], digits=3)` for distribution of laser encounters by day of the week, and `r format(chisq.test(table(laserhits$Month))[[3]], digits=3)` for the distribution by month of the year.
+
+####Distribution of laser encounters by month and day of the week ###
+The following table describes the distribution of laser encounters by day of the week and month of the year. 
+
+```{r, echo=FALSE}
+# Table of laser encounters by month of the year and day of the week
+print(table(laserhits$Month,laserhits$Weekday),row.names=FALSE)
+```
+
+####Using heat maps to illustrate relationships####
+As was the case when conducting a chi-square test on the distribution of laser encounters by day of the week or month of the year, when considering the two together, the null hypothesis of a uniform distribution of strike encounters by a combination of day of the week and month of the year would also be rejected (p-value of `r format(chisq.test(table(laserhits$Month,laserhits$Weekday))[[3]], digits=3)`. 
+
+It is also possible to visually depict this non-uniform distribution using heat maps. The heat map would reflect the data in the previous table, with 84 cells representing a combination of the month and day of the week. The colors correspond to a level of intensity with white being on the low end of the scale and dark blue on the upper end.
+
+#####Heat map 1: Showing months with the most hits#####
+There are three ways to display this heat map. In the first option, the darkest cell corresponds to the cell (combination of month and day of the week) with the most laser encounters.
+
+```{r, echo=FALSE}
+# Heat maps will use a color pallette that goes from white for lowest to dark blue for the highest value
+palette = colorRampPalette(c('#ffffff','#0000ff'))(64)
+
+heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
+        scale="none", col = palette, margins=c(15,13),
+        main="1. Laser encounters by month and day")
+```
+
+The above map shows that July through November tends to have more laser encounters, ad does Friday and Saturday.
+
+#####Heat map 2: Showing days of the week with the most hits#####
+Another way to illustrate the same table of values is to scale the heat map by the row values (months). By doing so, in each row, the darkest cell would correspond to the day of the week with the most laser encounters for that month. This means that a column that is consistently darker blue would correspond to a day of the week that is more likely to have laser encounters.
+
+```{r, echo=FALSE}
+heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
+        scale="row", col = palette, margins=c(15,13),
+        main="2. Laser encounters scaled by month")
+```
+
+This second map show that for most months of the year, Friday and Saturday have a consistently higher number of laser encounter reports than other days of the week. 
+
+#####Heat map 3: Showing months of the year with the most hits#####
+By scaling the heat map by day of the week instead of by month would serve to illustrate the months of the year that have consistently higher levels of laser strike reporting. 
+
+```{r, echo=FALSE}
+heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
+        scale="column", col = palette, margins=c(15,13),
+        main="3. Laser encounters scaled by day")
+```
+
+This heat map shows that the months of July through October have consistently higher levels of laser encounter reports than the other eight months of the year.
+
+####What the first three heat maps suggest####
+Using the same table of data summarizing the distribution of strikes by a combination of month of the year and day of the week, the three heat maps were able to highlight the following:
+
+- Heat map #1: The combination of month and day with relatively high numbers of laser encounters.
+
+- Heat map #2: The day of the week that consistently had higher levels of stirke reports throughout the year.
+
+- Heat map #3: The months of the year with consistently higher levels of strike reports.
+
+Together, the table plus the three heat maps suggest an overall pattern of laser encounter reporting that is consistent with higher levels of laser encounters occurring from roughly the middle of summer until the early fall, and also on Friday and Saturday. 
+
+These general trends were evident, but not as strongly, in the unscaled heat map. This suggest that the scaled heat maps are preferable for exposing laser encounter trends associated with the dimension of either the day of the week or the month of the year.
+
+####When laser encounters happen during the day####
+While laser encounters could potentially occur at any time of day, they would be most notable well after sunset or well before sunrise. That is reflected by the fact that for the US as a whole, about `r format((nrow(laserhits[laserhits$Hour>=0 & laserhits$Hour<=6,])/nrow(laserhits))*100,digits=3)`% of the reports were for encounters that occurred between 0000 and 0600 hours UTC. In the continental US during daylight savings time, this would correspond to between 5 p.m. and 11 p.m in the Pacific Time Zone and 8 p.m. and 2 a.m. in the Eastern Time Zone.
+
+By using the heat map below, which is scaled by the month of the year (the x-axis), it is possible to show a seasonal shift in reporting, with with the concentration of reports shifting to later in the day from May to August.
+
+```{r, echo=FALSE}
+heatmap(table(laserhits$Hour, laserhits$Month),Rowv=NA, Colv=NA,revC=TRUE, 
+        scale="column", col = palette, margins=c(13,2), 
+        main="4. By hour laser encounters scaled by month")
+```
+
+###Laser encounters by state###
+
+```{r, echo=FALSE}
+
+# LASER ENCOUNTERS BY STATE
+state.tot = as.data.frame(table(laserhits$State)) 
+# Turns table output into a two-column data frame sorted alphabetically by state
+
+# Rename the columns for clarity
+colnames(state.tot) = c("State","Events") 
+
+# Ensure state variabe is of type character
+state.tot$State = as.character(state.tot$State)
+
+# States ordered by laser totals
+ordered.state.tot = state.tot[order(state.tot$Events, decreasing=TRUE),] 
+
+```
+
+The FAA collected laser encounter data for a total of `r length(state.tot$State)` states and territories. The most encounters in `r ordered.state.tot$State[1]` with `r format(ordered.state.tot$Events[1], big.mark = ",")`. The encounters were concentrated in a few states, with `r sum(state.tot$Events<260)` states and territories having on average fewer than one reported laser encounter per week.
+
+####Laser encounter risk in selected metropolitan areas####
+Laser encounter reports tend to occur in areas that have significant amounts of aviation activity. One way of estimating the overall risk of an encounter is to compare the proportion of reported laser encounters with the proportion of the estimated air traffic in that area.
+
+The following metropolitan areas were chosen as examples of how this risk can be estimated. Each of these metropolitan areas and their number of reported encounters is followed by a list of the three-letter IATA codes of airports associated with that metropolitan area. The airports are ordered by the number of encounter reports. In each case, that airport was associated with at least 10 laser encounter reports. Air traffic data was available for most of the airports in that area. There was no available flight operations data for the airports in brackets:
+
+* Atlanta: ATL, LZV, PDK
+* Los Angeles: LAX, ONT, SNA, BUR, VNY, LGB, [SLI], SMO, [RIV], PMD POC, EMT, SBD, TOA, OXR
+* New York: LGA, EWR, JFK, TEB HPN, ISP, N51
+* Phoenix: PHX, DVT, IWA, SDL, FFZ, CHD
+* San Francisco: SJC, SFO, OAK, CCR, PAO, LVK, [NVQ], SQL, [JMC]
+* Washington, DC: DCA, IAD, BWI, ADW, MTN, [ANP]
+
+There were a total of `r format(nrow(laserhits), digits=5, big.mark = ",")` encounters across the nation, so the encounter totals for the selected airports (in parentheses) in these metropolitan areas accounted for the following percentages of all laser encounters:
+
+* Atlanta (157) - 0.89%
+* Los Angeles (1,337) - 7.32%
+* New York (584) - 3.31%
+* Phoenix (637) - 3.61%
+* San Francisco (763) - 4.32%
+* Washington, DC (358) - 2.03%
+
+If the percentage of encounter reports was greater than the percentage of flight operations, that would indicate that the metropolitan area was more likely to have laser encounters reports. Specifically, the risk estimator was the percentage of reported laser encounters divided by the percentage of estimated air traffic. Ratios higher than one would indicate a relatively higher risk of laser encounters.
+
+A separate FAA database provided a reasonable estimate for air traffic in these metropolitan areas. 
+
+####Air traffic data preparation####
+Air traffic data for the five metropolitan areas was retrieved from the FAA's Air Traffic Activity System (ATADS) located at https://aspm.faa.gov/opsnet/sys/Airport.asp
+
+Because laser encounters could occur with any kind of aircraft, all air traffic recorded by the FAA was considered. That would include flights involving air carriers, air taxi operators, general aviation, and military operations. The traffic numbers included by local and itinerant traffic.
+
+According to the ACADS, for the period 2010-2014, there were 251.8 million flight operations in the US. Below are the flight operations in the selected metropolitan areas, and the percentage of the nation's traffic represented by each area.
+
+
+* Atlanta - (5.71M) - 2.27%
+* Los Angeles (10.72M) - 4.26%
+* New York (8.35M) - 3.32%
+* Phoenix (7.69M) - 3.05%
+* San Francisco (6.34M) - 2.52%
+* Washington, DC (5.23M) - 2.08%
+
+####Ratios of laser reports to overall traffic####
+The ratios of percentage of reports to percentage of air traffic activity for these six areas were:
+
+* Atlanta - 0.89/2.27 = 0.39
+* Los Angeles - 7.32/4.26 = 1.72
+* New York - 3.31/3.32 = 1.00
+* Phoenix - 3.61/3.05 = 1.18
+* San Francisco - 4.32/2.52 = 1.71
+* Washington, DC - 2.03/2.08 = 0.98
+
+This estimates suggest that the New York and Washington, DC areas have a proportion of laser encounter reports that are in line with their amount of air traffic, Atlanta's proportion of laser encounters is much lower than its proportion of traffic, and both San Francisco and Los Angeles have a much higher proportion.
+
+###Discussion###
+The laser encounter data collected by the FAA represents an important resource for understanding the kinds of current and future risks that aircraft face from lasers. This study was focused on the distribution of laser encounters and how visual summaries such as heat maps can be used in conjunction with statistical measurements to communicate the scale and scope of the problem.
+
+The raw data provided by the FAA required further processing before it could used in this study, and that data cleaning processed revealed a number of issues with the data collection process, including inconsistencies in how airport identifiers are used. 
+
+The patterns of laser encounters revealed in this analysis suggested that likelihood of encounters strongly related to the time of day, and somewhat less strongly related to the day of the week or the month of the year. Also, while most of the encounters are associated with a relatively small number of airports, the problem is present throughout the US.
+
+###Resources###
+Laser Illumination of Flight Crew Personnel by Month, Day of Week, and Time of Day for a 5-Year Study Period: 2004-2008
+DOT/FAA/AM-11/7
+https://www.faa.gov/data_research/research/med_humanfacs/oamtechreports/2010s/media/201107.pdf
+
+Laser News, Laws, & Civil Penalties (FAA)
+https://www.faa.gov/about/initiatives/lasers/laws/
+
+Reported Laser Incidents for 2010-2014 (FAA)
+https://www.faa.gov/about/initiatives/lasers/laws/media/laser_incidents_2010-2014.xls
+
+Processed Laser Incident data used in this study
+http://www.airsafe.com/analyze/faa_laser_data.csv
+
+Patterns of laser strikes on US aircraft (this report)
+
+* HTML - http://www.airsafe.com/analyze/laser_strikes.html
+* Rmd - http://www.airsafe.com/analyze/laser_strikes.Rmd
+* R (background analysis) - http://www.airsafe.com/analyze/laser_strikes.R
+* RPubs - http://rpubs.com/airsafe/lasers
+
