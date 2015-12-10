@@ -171,7 +171,7 @@ laserhits$Weekday = factor(laserhits$Weekday,levels=c("Sun","Mon","Tue",
 
 - During this five-year period, there was an average of `r format(nrow(laserhits)/1827, digits=3)` laser encounters per day, with as many as `r max(table(laserhits$Date))` strikes in a single day. The median number of daily laser encounters was `r median(table(laserhits$Date)[[1]])`.
 
-- There were only `r sum(1827-nrow(laserhits))` days over these five years with no reported laser strikes on aircraft in the United States. In other words, on any given day in the United States, there was a `r format((nrow(laserhits)/1827)*100, digits=3)`% chance that at least one aircraft will have a potentially dangerous encounter with a laser beam.
+- There were only `r sum(1826-nrow(laserhits))` days over these five years with no reported laser strikes on aircraft in the United States. In other words, on any given day in the United States, there was a `r format((nrow(laserhits)/1826)*100, digits=3)`% chance that at least one aircraft will have a potentially dangerous encounter with a laser beam.
 
 Below is a table and a histogram illustrating the distribution of the number of laser encounter reports in a day. 
 
@@ -179,7 +179,7 @@ Below is a table and a histogram illustrating the distribution of the number of 
 
 # Create a complete table and histogram of days with x-amount of strike events
 #  by adding a vector of zero values equal to the number of days with no strikes
-daily.strikes=c(rep(0,1827-length(table(laserhits$Date))),as.data.frame(table(laserhits$Date))[,2])
+daily.strikes=c(rep(0,1826-length(table(laserhits$Date))),as.data.frame(table(laserhits$Date))[,2])
 
 # Note that adding 0.001 to the vector of values helps to align the axes with
 # the hourly range of encounter
