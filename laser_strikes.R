@@ -67,21 +67,27 @@ paste("A total of",nrow(laserhits.raw)-nrow(laserhits), "of the original",format
 # FUNCTION FOR REMOVING LEADING AND TRAILING SPACES AND NON-PRINTING CHARACTERS
 
 # Function 'stripper' definition
-# This function removes leading and trailing spaces from a vector.
+
 # The first step is to ensure the vector 'x' is character type by using 'as.character()' function.
 # The next step is to remove the leading space characters, including leading tab, 
 #       newline, vertical tab, form feed, carriage return, and space:
-# 
+#
 #      - x = sub("^[[:space:]]+", "", x) 
+#
+# Less general alterative is t use sub("^\\s+", "", x)
 #
 # Trailing spaces can be removed in a simlar fashion:
 #      - str = sub("[[:space:]]+$", "", str)
-#      
+#
+# Less general alterative is t use sub("\\s+$", "", x)   
 # Notes:
 #      - The "$" character is the end of string character, "^"is beginning of string character
 #      - Note that without the "+", only the first instance would be removed
+#      - [:space:] is all space characters (tab, newline, vertical tab, form feed, carriage return, and space)
 
 stripper <- function(x){
+        # This function removes leading and trailing spaces from a vector.
+        # Equivalent to the str_trim() function in the strigr package   
         x = as.character(x)
         x = sub("[[:space:]]+$", "", x) # Remove leading space characters
         x = sub("^[[:space:]]+", "", x) # Remove trailing space characters
@@ -141,17 +147,17 @@ paste("From 2010 to 2014, there were",
              "unique airports or other locations.", sep=" ") 
 # Note: had to remove one unique location due to the "UNKN" location events 
 
-paste("During this five-year period, there was an average of",format(nrow(laserhits)/1827, digits=3, big.mark = ","),
+paste("During this five-year period, there was an average of",format(nrow(laserhits)/1826, digits=3, big.mark = ","),
       "laser encounters per day, with as many as", max(sort(table(laserhits$Date))), "strikes in a single day.",
-       "There were only",1827-length(table(laserhits$Date)),
+       "There were only",1826-length(table(laserhits$Date)),
       "days over these five years with no reported laser strikes on aircraft in the United States", sep=" ")
 
-paste("In other words, on any given day in the United States, there is a ",format((length(unique(laserhits$Date))/1827)*100, digits=3, big.mark = ","),
+paste("In other words, on any given day in the United States, there is a ",format((length(unique(laserhits$Date))/1826)*100, digits=3, big.mark = ","),
       "% chance that at least one aicraft will have a potentially dangerious encounter with a laser beam.", sep="")
 
 # Create a complete table and histogram of days with x-amount of strike events
 #  by adding a vector of zero values equal to the number of days with no strikes
-daily.strikes=c(rep(0,1827-length(table(laserhits$Date))),as.data.frame(table(laserhits$Date))[,2])
+daily.strikes=c(rep(0,1826-length(table(laserhits$Date))),as.data.frame(table(laserhits$Date))[,2])
 
 # EXPLORATORY DATA ANALYSIS: Distribution, histogram, and summary of the number of daily laser encounters
 
