@@ -3,13 +3,12 @@
 # 5 December 2015
 # First, ensure we have the packages we need
 
-if (!require("downloader")){ 
-      install.packages("downloader") 
-} 
+# For downloading raw data
+install.packages("downloader")  
 library(downloader) 
 
 # Data file was located at FAA page "Laser News, Laws, & Civil
-        # Penalties" page at https://www.faa.gov/about/initiatives/lasers/laws/
+# Penalties" page at https://www.faa.gov/about/initiatives/lasers/laws/
 
 # Original data is at https://www.faa.gov/about/initiatives/lasers/laws/laser_incidents_2010-2014.xls
 
@@ -47,11 +46,13 @@ download(url, destfile=filename)
 
 # Raw data included are all 50 states, the District of Columbia, and Puerto Rico, and several US territories.
 
-# Input raw file
+# Input raw laser data file
 laserhits = NULL
 laserhits.raw = NULL
 laserhits.raw = read.csv("faa_laser_data.csv")
 laserhits=laserhits.raw
+
+
 
 # DATA CLEANING: Removal of unknown location (City, State, or Airport) and time of day (Hour) from further analysis
 laserhits = subset(laserhits.raw, City!="UNKN"  & State!="UNKN" &  Airport!="UNKN"  & Hour!="UNKN" )
@@ -86,12 +87,12 @@ paste("A total of",nrow(laserhits.raw)-nrow(laserhits), "of the original",format
 #      - [:space:] is all space characters (tab, newline, vertical tab, form feed, carriage return, and space)
 
 stripper <- function(x){
-        # This function removes leading and trailing spaces from a vector.
-        # Equivalent to the str_trim() function in the strigr package   
-        x = as.character(x)
-        x = sub("[[:space:]]+$", "", x) # Remove leading space characters
-        x = sub("^[[:space:]]+", "", x) # Remove trailing space characters
-        return(x)
+      # This function removes leading and trailing spaces from a vector.
+      # Equivalent to the str_trim() function in the strigr package   
+      x = as.character(x)
+      x = sub("[[:space:]]+$", "", x) # Remove leading space characters
+      x = sub("^[[:space:]]+", "", x) # Remove trailing space characters
+      return(x)
 }
 
 # Remove leading and trailing space characters from selected variables.
@@ -140,16 +141,16 @@ laserhits$Weekday = factor(laserhits$Weekday,levels=c("Sun","Mon","Tue",
 # sapply(laserhits,is.factor)
 
 # QUICK SUMMARY
-      
+
 paste("From 2010 to 2014, there were",
-       format(nrow(laserhits), digits=5, big.mark = ","),
-             "encounters where a laser beam affected one or more aircraft at or near at least",format(length(table(laserhits$Airport))-1, digits=4, big.mark = ","),
-             "unique airports or other locations.", sep=" ") 
+      format(nrow(laserhits), digits=5, big.mark = ","),
+      "encounters where a laser beam affected one or more aircraft at or near at least",format(length(table(laserhits$Airport))-1, digits=4, big.mark = ","),
+      "unique airports or other locations.", sep=" ") 
 # Note: had to remove one unique location due to the "UNKN" location events 
 
 paste("During this five-year period, there was an average of",format(nrow(laserhits)/1826, digits=3, big.mark = ","),
       "laser encounters per day, with as many as", max(sort(table(laserhits$Date))), "strikes in a single day.",
-       "There were only",1826-length(table(laserhits$Date)),
+      "There were only",1826-length(table(laserhits$Date)),
       "days over these five years with no reported laser strikes on aircraft in the United States", sep=" ")
 
 paste("In other words, on any given day in the United States, there is a ",format((length(unique(laserhits$Date))/1826)*100, digits=3, big.mark = ","),
@@ -164,8 +165,10 @@ daily.strikes=c(rep(0,1826-length(table(laserhits$Date))),as.data.frame(table(la
 table(daily.strikes)
 
 hist(daily.strikes, main="Distribution of number of laser encounters in a day",
-     xlab="Number of strikes in a day", , breaks = seq(-1,35,by=1), include.lowest=TRUE, col="dodgerblue")
+     xlab="Number of strikes in a day",  breaks = seq(-1,35,by=1), include.lowest=TRUE, col="dodgerblue")
 
+# Note: if you get a plotting error suggesting the areas is 
+# too large, from RStudio console, use the command "dev.off()"
 summary(daily.strikes)
 
 # Distribution and  histogram of laser encounters by (UTC) hour of the day
@@ -211,7 +214,7 @@ table(laserhits$Month,laserhits$Weekday)
 chisq.test(table(laserhits$Month,laserhits$Weekday))
 
 # Create a heat map (#1.0) for combination of day of the week and month with no scaling.
-. Scaling by row (the month)
+# Scaling by row (the month)
 #       will highlight the day of the week with a relatively high or low number of spikes.
 #       The darkest cells correspond indicate that this combination of month and 
 #       day of the week had more laser encounters than lighter colored cells.0
@@ -285,8 +288,8 @@ table(laserhits$Hour,laserhits$Month)
 #       that entire column (month) will be in general darker for most hours If that month is 
 #       less likely to have strikes, it will be relatively lighter for most hours.
 
-heatmap(table(laserhits$Hour, laserhits$Month),Rowv=NA, Colv=NA,revC=TRUE, 
-        scale="row", col = palette, margins=c(13,2), 
+heatmap(table(laserhits$Hour, laserhits$Month),Rowv=NA, Colv=NA,revC=TRUE,
+        scale="row", col = palette, margins=c(13,2),
         main="3.1: Monthly laser encounters scaled by hour")
 
 
@@ -368,22 +371,208 @@ paste(ordered.airport.tot$Airport[1:100],"-",ordered.airport.tot$Events[1:100],s
 us.list = NULL
 paste("Summary of laser hits by selected airports in a state with a maximum of 15 airports listed per state.")
 for(i in 1:nrow(state.tot)){
-        # Laser events in state i
-        
-        state.list = laserhits[laserhits$State==state.tot[i,1],]
-        
-        # Orderd list of table of airport events in state i
-        state.airports.ordered = as.data.frame(sort(table(state.list$Airport), decreasing=TRUE))
-        
-        # Printing out states and their airports (maximum of 15)
-        cat("\n")
-        state.airports.unique = length(unique(state.list$Airport)) # Unique airport names in state i
-        if (state.airports.unique>15) cat(state.tot[i,1]," (Top 15 airports)")
-        if (state.airports.unique<=15 & state.airports.unique>1) cat(state.tot[i,1]," (All reporting airports)")
-        if(state.airports.unique==1) cat(state.tot[i,1]," (All reporting airports)\n") # Ensures propor formatting for one-airport states
-        # cat(state.tot[i,1],"\n")
-        print(state.airports.ordered[1:min(state.airports.unique,15),]) # Prints a maximum of 10 airports
-        
-        # Creating a list of list where each list element is the state summary
-        us.list[[i]] = list(State=state.tot[i,1], Locations=state.airports.unique, Airports=state.airports.ordered)
+      # Laser events in state i
+      
+      state.list = laserhits[laserhits$State==state.tot[i,1],]
+      
+      # Orderd list of table of airport events in state i
+      state.airports.ordered = as.data.frame(sort(table(state.list$Airport), decreasing=TRUE))
+      
+      # Printing out states and their airports (maximum of 15)
+      cat("\n")
+      state.airports.unique = length(unique(state.list$Airport)) # Unique airport names in state i
+      if (state.airports.unique>15) cat(state.tot[i,1]," (Top 15 airports)")
+      if (state.airports.unique<=15 & state.airports.unique>1) cat(state.tot[i,1]," (All reporting airports)")
+      if(state.airports.unique==1) cat(state.tot[i,1]," (All reporting airports)\n") # Ensures propor formatting for one-airport states
+      # cat(state.tot[i,1],"\n")
+      print(state.airports.ordered[1:min(state.airports.unique,15),]) # Prints a maximum of 10 airports
+      
+      # Creating a list of list where each list element is the state summary
+      us.list[[i]] = list(State=state.tot[i,1], Locations=state.airports.unique, Airports=state.airports.ordered)
 }
+
+
+# Now for the heat maps using US states outline
+# Load the necessry packages
+
+# For map-related data displays that used as inspiration
+# the example at http://docs.ggplot2.org/0.9.3.1/map_data.html
+install.packages("maps", repos="http://cran.rstudio.com/") 
+library(maps)
+
+install.packages("ggplot2", repos="http://cran.rstudio.com/") 
+library(ggplot2)
+
+# Input summary flight operations statistics
+
+# Converted to a CSV file and can be downloaded from AirSafe.com 
+url <- "http://www.airsafe.com/analyze/faa_opsnet_by_state.csv"
+filename <- "faa_opsnet_by_state.csv" 
+download(url, destfile=filename)
+
+flight.data = NULL
+flight.data.raw = NULL
+flight.data.raw = read.csv("faa_opsnet_by_state.csv")
+flight.data=flight.data.raw
+# Ensure that State variable is character
+flight.data$State = as.character(flight.data$State)
+
+# Rename column "State" to "State.abb" to be consistent with earlier usage
+names(flight.data)[names(flight.data)=="State"] = "State.abb"
+
+flight.data$State.abb = flight.data$State
+
+# Ensure the other columns are numeric
+# for (i in 2:length(colnames(flight.data))) {
+#         flight.data[,i] = as.numeric(as.character(flight.data[,i]))
+# }
+# apply(flight.data,2,typeof)
+
+# Add column for percentage of total flights
+usa.tot.flights = flight.data$Total.Operations[nrow(flight.data)]
+flight.data$Percent.ops = 100*flight.data$Total.Operations/usa.tot.flights
+
+
+# Note that in ggplot2, the map function used here has the 48 states of the 
+# continental US plus the district of columbia
+# For the map displays used in this study, only those 48 states plus the
+# District of Columbia will be used in the rest of this analysis'
+
+extra.abb = c("DC")
+extra.name = c("District of Columbia")
+
+# Now append them to the R-provided list of 50 state names and abbreviations
+used.abb = c(state.abb,extra.abb)
+used.state = c(state.name,extra.name)
+
+# But take out Alaska and Hawaii
+used.abb = setdiff(used.abb, c("AK", "HI"))
+used.state = setdiff(used.state, c("Alaska", "Hawaii"))
+
+# Now make the combination of state abbreviation and lowercase state name 
+# a data frame with column names "State.abb" and "State" and row names 
+# equal to the state name
+state.combo = as.data.frame(cbind(used.abb,used.state))
+rownames(state.combo) = used.state
+colnames(state.combo) = c("State.abb","State")
+
+# Ensure that both columns are characters
+state.combo$State = as.character(state.combo$State)
+state.combo$State.abb = as.character(state.combo$State.abb)
+
+# Will now merge do two sets of merges. 
+# The first will merge the data frames "state.tot" which has total laser events
+# for each state with the "state.combo" which has the states that will be used in 
+# the maps. This will use the variable "State" to merge into a new "state.combo"
+state.combo = merge(state.tot,state.combo, by = "State")
+
+# will now add a new column representing the percent of all laser events by state
+state.combo$Percent.events = 100*state.combo$Events/nrow(laserhits)
+
+# The second merge will involve "state.tot" and "flight.data",
+# this time merging by the common variable "State.abb" into a new "state.combo"
+state.combo = merge(flight.data,state.combo, by = "State.abb")
+
+# This combined data frame "state.combo" now has the data for the 48 states plus DC
+# An additional column will have a relative risk measue that is the ratio 
+# of the percentage of laser events divided by the precentage of flight operarions
+# A state with a proportion of strikes greater than the proportion of flight 
+# operations (a ration greater than 1) would imply that this state has more strike
+# events per flight operation.
+state.combo$risk.ratio = state.combo$Percent.events/state.combo$Percent.ops
+
+
+
+
+# The following gets the state boundary data into a data frame
+# Regions happpen to be lower case state names
+states <- map_data("state") 
+
+# map_data is from ggplot2, creates data frame from information from the 
+# 'maps' package and each region of a state is one of the polygons making up that state
+# the data frame "states" has a column "region" which corresponds to the "States"
+# column in the "state.combo" data frame, so now will create a "regions" column to
+# allow a merging of "states" and "state.combo"
+state.combo$region = state.combo$State
+
+# ggplot2 likes their full state names (regions) in lower case, so the 
+# new "regions" column in state.combo will have values in lower case.
+state.combo$region = tolower(state.combo$region)
+
+
+# Each row corresponds to a state. 
+# Create a new variable called 'region' which is the lower case
+# version of each state name. 
+# Note that ggplot2 related variables use lower case of state
+# and the map of the states only includes 49 areas
+# corresponding to the 48 states in the continental US plus
+# the District of Columbia.
+#
+# Merging data frames "states" and "state.combo" by common variable "region")"
+# 
+# The merged data frame "chrono" has relevant laser data in each state region
+# Note that because "states" has more rows than "state.combo", the
+# number of rows of the merged data.frame will match the 
+# data frame with the highest number of rows
+# In other words, nrow(<merged data frame>) = nrow(states) and
+# some of the data from the data frame with the smaller
+# number of rows will be duplicated.
+
+choro = merge(states, state.combo, sort = FALSE, by = "region")
+
+# In the 'states' data frame, each region has a unique number (variable 'order'),
+# from 1 to nrow(states). The line below reorders the rows by 'order' from 1 to 
+# nrow(choro). Note again that nrow(choro) = nrow(states)
+choro <- choro[order(choro$order), ]
+
+# Note that there are 50 states (regions) but 62 groups. 
+# ========
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Percent.ops, group=group))
+gg <- gg + labs(title = "1. Percent US of flight operations by state", 
+                x="Darker colors imply a greater percentage of US flight operations", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+
+# ========
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Percent.events, group=group))
+gg <- gg + labs(title = "2. Percent of laser encounters by state", 
+                x="Darker colors imply a greater percentage of laser encounters", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+
+# ========
+
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=risk.ratio, group=group))
+gg <- gg + labs(title = "3. Risk ratio of percent events over percent traffic", 
+                x="Darker colors imply higher risk of laser encounters", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+# For more on customizing ggplot, see http://docs.ggplot2.org/dev/vignettes/themes.html
+#
+# Some of the parts of the map of the continental US, particularly 
+# smaller states and the  District of Columbia, can't be seen easily, 
+# so below is a list of the top ten areas with the highest values for 
+# percent of laser encounters divided by the percent of traffic.
+
+# First, create an ordered data frame of state.combo data frame
+state.combo.ordered = state.combo[order(-state.combo[,"risk.ratio"]),]
+state.top.10.risk = state.combo.ordered[1:10,c("State","risk.ratio")]
+rownames(state.top.10.risk) <- NULL
+state.top.10.risk$risk.ratio = round(state.top.10.risk$risk.ratio,2)
+# Now print the data frame
+print.data.frame(state.top.10.risk)
