@@ -1,8 +1,8 @@
 ---
 title: 'Patterns of laser strikes on US aircraft: 2010 to 2014'
 author: "Todd Curtis"
-date: "December 20, 2015"
-output: html_document
+date: "January 20, 2016"
+output: pdf_document
 ---
 
 ###Summary###
@@ -231,10 +231,11 @@ There are three ways to display this heat map. In the first option, the darkest 
 
 ```{r, echo=FALSE}
 # Heat maps will use a color pallette that goes from white for lowest to dark blue for the highest value
+
 palette = colorRampPalette(c('#ffffff','#0000ff'))(64)
 
 heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
-        scale="none", col = palette, margins=c(15,13),
+        scale="none", col = palette, margins=c(5,1),
         main="1. Laser encounters by month and day")
 ```
 
@@ -245,7 +246,7 @@ Another way to illustrate the same table of values is to scale the heat map by t
 
 ```{r, echo=FALSE}
 heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
-        scale="row", col = palette, margins=c(15,13),
+        scale="row", col = palette, margins=c(5,1),
         main="2. Laser encounters scaled by month")
 ```
 
@@ -256,7 +257,7 @@ By scaling the heat map by day of the week instead of by month would serve to il
 
 ```{r, echo=FALSE}
 heatmap(table(laserhits$Month,laserhits$Weekday),Rowv=NA, Colv=NA,revC=TRUE,
-        scale="column", col = palette, margins=c(15,13),
+        scale="column", col = palette, margins=c(5,1),
         main="3. Laser encounters scaled by day")
 ```
 
@@ -282,7 +283,7 @@ By using the heat map below, which is scaled by the month of the year (the x-axi
 
 ```{r, echo=FALSE}
 heatmap(table(laserhits$Hour, laserhits$Month),Rowv=NA, Colv=NA,revC=TRUE, 
-        scale="column", col = palette, margins=c(13,2), 
+        scale="column", col = palette, margins=c(3,1), 
         main="4. By hour laser encounters scaled by month")
 ```
 
@@ -305,19 +306,7 @@ ordered.state.tot = state.tot[order(state.tot$Events, decreasing=TRUE),]
 
 ```
 
-The FAA collected laser encounter data for a total of `r length(state.tot$State)` states and territories. The most encounters in `r ordered.state.tot$State[1]` with `r format(ordered.state.tot$Events[1], big.mark = ",")`. The encounters were concentrated in a few states, with `r sum(state.tot$Events<260)` states and territories having on average fewer than one reported laser encounter per week. The top 10 states in number of laser encounters for 2010 to 2014 were:
-
-1. `r paste(format(ordered.state.tot$Events[1], big.mark = ","),"-",ordered.state.tot$State[1],sep=" ")`
-2. `r paste(format(ordered.state.tot$Events[2], big.mark = ","),"-",ordered.state.tot$State[2],sep=" ")`
-3. `r paste(format(ordered.state.tot$Events[3], big.mark = ","),"-",ordered.state.tot$State[3],sep=" ")`
-4. `r paste(ordered.state.tot$Events[4],"-",ordered.state.tot$State[4],sep=" ")`
-5. `r paste(ordered.state.tot$Events[5],"-",ordered.state.tot$State[5],sep=" ")`
-6. `r paste(ordered.state.tot$Events[6],"-",ordered.state.tot$State[6],sep=" ")`
-7. `r paste(ordered.state.tot$Events[7],"-",ordered.state.tot$State[7],sep=" ")`
-8. `r paste(ordered.state.tot$Events[8],"-",ordered.state.tot$State[8],sep=" ")`
-9. `r paste(ordered.state.tot$Events[9],"-",ordered.state.tot$State[9],sep=" ")`
-10. `r paste(ordered.state.tot$Events[10],"-",ordered.state.tot$State[10],sep=" ")`
-
+The FAA collected laser encounter data for a total of `r length(state.tot$State)` states and territories. The most encounters in `r ordered.state.tot$State[1]` with `r format(ordered.state.tot$Events[1], big.mark = ",")`. The encounters were concentrated in a few states, with `r sum(state.tot$Events<260)` states and territories having on average fewer than one reported laser encounter per week.
 
 ####Laser encounter risk in selected metropolitan areas####
 Laser encounter reports tend to occur in areas that have significant amounts of aviation activity. One way of estimating the overall risk of an encounter is to compare the proportion of reported laser encounters with the proportion of the estimated air traffic in that area.
@@ -345,7 +334,7 @@ If the percentage of encounter reports was greater than the percentage of flight
 A separate FAA database provided a reasonable estimate for air traffic in these metropolitan areas. 
 
 ####Air traffic data preparation####
-Air traffic data for the five metropolitan areas was retrieved from the FAA's Air Traffic Activity System (ATADS) located at https://aspm.faa.gov/opsnet/sys/Airport.asp. This resource was used in this report to evaluate the proportion laser encounters for US states or particular us metropolitan areas with the proportion of air traffic.
+Air traffic data for the five metropolitan areas was retrieved from the FAA's Air Traffic Activity System (ATADS) located at https://aspm.faa.gov/opsnet/sys/Airport.asp
 
 Because laser encounters could occur with any kind of aircraft, all air traffic recorded by the FAA was considered. That would include flights involving air carriers, air taxi operators, general aviation, and military operations. The traffic numbers included by local and itinerant traffic.
 
@@ -377,11 +366,10 @@ The following four maps illustrate the extent of the hazard in the continental U
 ```{r, echo=FALSE}
 # For map-related data displays that used as inspiration
 # the example at http://docs.ggplot2.org/0.9.3.1/map_data.html
-install.packages("maps", repos="http://cran.rstudio.com/") 
+install.packages("maps", repos="http://cran.rstudio.com/")  
 library(maps)
 
-install.packages("ggplot2", repos="http://cran.rstudio.com/")  
-library(maps)
+install.packages("ggplot2", repos="http://cran.rstudio.com/") 
 library(ggplot2)
 
 # Input summary flight operations statistics
@@ -463,6 +451,8 @@ state.combo = merge(flight.data,state.combo, by = "State.abb")
 state.combo$risk.ratio = state.combo$Percent.events/state.combo$Percent.ops
 
 
+
+
 # The following gets the state boundary data into a data frame
 # Regions happpen to be lower case state names
 states <- map_data("state") 
@@ -470,9 +460,9 @@ states <- map_data("state")
 # map_data is from ggplot2, creates data frame from information from the 
 # 'maps' package and each region of a state is one of the polygons making up that state
 # the data frame "states" has a column "region" which corresponds to the "States"
-# column in the "state.combo" data frame, so now will create a "regions" column to
-# allow a merging of "states" and "state.combo"
-state.combo$region = state.combo$State
+# column in the "state.combo" data frame, so now will rename that column so we can 
+# merge "states" and "state.combo"
+names(state.combo)[names(state.combo)=="State"] = "region"
 
 # ggplot2 likes their full state names (regions) in lower case, so the 
 # new "regions" column in state.combo will have values in lower case.
@@ -483,21 +473,14 @@ state.combo$region = tolower(state.combo$region)
 # Create a new variable called 'region' which is the lower case
 # version of each state name. 
 # Note that ggplot2 related variables use lower case of state
-# and the map of the states only includes 49 areas
-# corresponding to the 48 states in the continental US plus
-# the District of Columbia.
-#
-# Merging data frames "states" and "state.combo" by common variable "region")"
-# 
-# The merged data frame "chrono" has relevant laser data in each state region
-# Note that because "states" has more rows than "state.combo", the
-# number of rows of the merged data.frame will match the 
-# data frame with the highest number of rows
-# In other words, nrow(<merged data frame>) = nrow(states) and
-# some of the data from the data frame with the smaller
-# number of rows will be duplicated.
+# arrests$region <- tolower(rownames(USArrests)) # 50 states, no DC or PR
 
-choro = merge(states, state.combo, sort = FALSE, by = "region")
+# Merging data frames "states" and "arrests" by common variable "region)
+# with no sorting by the column "region"
+# The merged data frame "chrono" has relevant arrest data in each state region
+# In other words, nrow(chrono) = nrow(states)
+# Because nrow(arrests) < nrow(states), some column data from 'arrests' gets duplicated
+choro <- merge(states, state.combo, sort = FALSE, by = "region")
 
 # In the 'states' data frame, each region has a unique number (variable 'order'),
 # from 1 to nrow(states). The line below reorders the rows by 'order' from 1 to 
@@ -518,13 +501,23 @@ gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill 
 gg
 ```
 
-The second one illustrates the percentage of laser encounters by state.
+The second one illustrates the number of laser encounters by state, and the third the percentage of laser encounters by state.
 
 ```{r, echo=FALSE}
 # ========
-
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Events, group=group))
+gg <- gg + labs(title = "2. Laser encounters by state", 
+                x="Darker colors imply more laser encounters", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+# ========
 gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Percent.events, group=group))
-gg <- gg + labs(title = "2. Percent of laser encounters by state", 
+gg <- gg + labs(title = "3. Percent of laser encounters by state", 
                 x="Darker colors imply a greater percentage of laser encounters", y=NULL)
 gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
 gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
@@ -537,16 +530,12 @@ gg
 # ========
 ```
 
-The first two maps show that the certain states, for example California, Texas, and Florida, had relativley high proportions of both laser encounters and air traffic compared to many states. 
-
-The third map illustrates the ratio of the percentage of laser encounters divided by the percentage of air traffic activity for each state. The value would be equal to one if the proportion of laser encounters is equal to its proportion of traffic, and greater than one if the proporiton of laser encounters is greater than that state's proporation of air traffic. 
-
-This map is noticably different from the first two graphs, with several states, including Pennsylvania, Delaware, and Oregon, having ratio values that were higher than several states like California and Florida which had a significant fraction of overall US air traffic. As with the previous two maps, darker colors imply higher values, which in this case would be a percentage of laser encounters that is higher than that region's proportion of flight activity.
+The last map shows a risk measure of the percent of events divided by the percentage of traffic, showing that states like California with a very high number of events doesn't have a higher risk measure than either Pennsylvania or Oregon.
 
 ```{r, echo=FALSE}
 gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=risk.ratio, group=group))
-gg <- gg + labs(title = "3. Risk ratio of percent events over percent traffic", 
-                x=NULL, y=NULL)
+gg <- gg + labs(title = "4. Risk ratio of percent events over percent traffic", 
+                x="Darker colors imply higher risk of laser encounters", y=NULL)
 gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
 gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
 gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
@@ -557,33 +546,6 @@ gg
 # For more on customizing ggplot, see http://docs.ggplot2.org/dev/vignettes/themes.html
 ```
 
-Below are the top 10 states ranked by ratio of percentage of laser encounters divided by percentage of air traffic (risk.ratio variable):
-```{r, echo=FALSE}
-# Some of the parts of the map of the continental US, particularly 
-# smaller states and the  District of Columbia, can't be seen easily, 
-# so below is a list of the top ten areas with the highest values for 
-# percent of laser encounters divided by the percent of traffic.
-
-# First, create an ordered data frame of state.combo data frame
-state.combo.ordered = state.combo[order(-state.combo[,"risk.ratio"]),]
-state.top.10.risk = state.combo.ordered[1:10,c("State","risk.ratio")]
-rownames(state.top.10.risk) <- NULL
-state.top.10.risk$risk.ratio = round(state.top.10.risk$risk.ratio,2)
-# Now print the data frame
-# print.data.frame(state.top.10.risk)
-```
-
-1. `r paste(state.top.10.risk[1,2], " - ", state.top.10.risk[1,1],sep="")`
-2. `r paste(state.top.10.risk[2,2], " - ", state.top.10.risk[2,1],sep="")`
-3. `r paste(state.top.10.risk[3,2], " - ", state.top.10.risk[3,1],sep="")`
-4. `r paste(state.top.10.risk[4,2], " - ", state.top.10.risk[4,1],sep="")`
-5. `r paste(state.top.10.risk[5,2], " - ", state.top.10.risk[5,1],sep="")`
-6. `r paste(state.top.10.risk[6,2], " - ", state.top.10.risk[6,1],sep="")`
-7. `r paste(state.top.10.risk[7,2], " - ", state.top.10.risk[7,1],sep="")`
-8. `r paste(state.top.10.risk[8,2], " - ", state.top.10.risk[8,1],sep="")`
-9. `r paste(state.top.10.risk[9,2], " - ", state.top.10.risk[9,1],sep="")`
-10. `r paste(state.top.10.risk[10,2], " - ", state.top.10.risk[10,1],sep="")`
-
 ###Discussion###
 The laser encounter data collected by the FAA represents an important resource for understanding the kinds of current and future risks that aircraft face from lasers. This study was focused on the distribution of laser encounters and how visual summaries such as heat maps can be used in conjunction with statistical measurements to communicate the scale and scope of the problem.
 
@@ -591,40 +553,29 @@ The raw data provided by the FAA required further processing before it could use
 
 The patterns of laser encounters revealed in this analysis suggested that likelihood of encounters strongly related to the time of day, and somewhat less strongly related to the day of the week or the month of the year. Also, while most of the encounters are associated with a relatively small number of airports, the problem is present throughout the US.
 
-When analyzed on a state level, laser encounters as well as flight operations are not at all distributed evenly, with some states such as California, Texas, and Florida risk of laser encounters appear to be higher in states such as Oregon and Pennsylvania. Specifically, these states account for a higher percentage of laser encounters than they do for total air traffic.
-
-####Potential for missing data####
-The data used in this report was compiled by the FAA, and relied on voluntary submissions from pilots, flight crews, and others. While submissions to the database came from a variety of sources, there was no indication in the available FAA literature about whether there were identifiable patterns in the reporting. Specifically, whether there were significant differences in what kind of flight operation or what kind of flying organization was more likely to report laser encounters to the FAA.
-
-One potential issue when is comes to laser exposure data is underreporting. For example, in April 2013, [Michael A. Smith of Omaha, Nebraska was sentenced to 24 months in prison for striking an Omaha Police Department helicopter with a laser on July 11, 2012](https://www.gpo.gov/fdsys/pkg/USCOURTS-ned-8_12-cr-00252/pdf/USCOURTS-ned-8_12-cr-00252-3.pdf). 
-
-While that conviction resulted in both an FBI press release and widespread media attention, the FAA database did not have a full accounting of that event in its laser encounter database, listing the 737 encounter on July  11th, but making no mention of the helicopter encounter. This is particularly noteworthy because [the federal conviction was for the pointing the laser at the police helicopter and not at the airliner](https://www.fbi.gov/omaha/press-releases/2013/omaha-man-given-24-month-prison-sentence-for-pointing-laser-at-aircraft).
-
-It is not clear if this kind of under reporting is common, but if there is to be a greater understanding of the scale and scope of the threats that lasers represent to aircraft, it may be necessary to review a wide range of potential sources of laser encounter reports, for example from military and law enforcement air safety incident reports, in order to develop a more complete picture of the threat posed by lasers. 
+When analyzed on a state level, the risk of laser encounters appear to be higher in states such as Oregon and Pennsylvania. Specifically, these states account for a higher percentage of laser encounters than they do for total air traffic.
 
 ###Resources###
 Laser Illumination of Flight Crew Personnel by Month, Day of Week, and Time of Day for a 5-Year Study Period: 2004-2008
-DOT/FAA/AM-11/7  
+DOT/FAA/AM-11/7
 https://www.faa.gov/data_research/research/med_humanfacs/oamtechreports/2010s/media/201107.pdf
 
-FAA's Air Traffic Activity System (ATADS) full database  
+FAA's Air Traffic Activity System (ATADS) 
 https://aspm.faa.gov/opsnet/sys/Airport.asp
 
-ATADS summary of all air traffic by state 2010-2014  
-http://airsafe.com/analyze/faa_opsnet_by_state.csv
-
-Laser News, Laws, & Civil Penalties (FAA)  
+Laser News, Laws, & Civil Penalties (FAA)
 https://www.faa.gov/about/initiatives/lasers/laws/
 
-Reported Laser Incidents for 2010-2014 (FAA)  
+Reported Laser Incidents for 2010-2014 (FAA)
 https://www.faa.gov/about/initiatives/lasers/laws/media/laser_incidents_2010-2014.xls
 
-Processed Laser Incident data used in this study  
+Processed Laser Incident data used in this study
 http://www.airsafe.com/analyze/faa_laser_data.csv
 
-Patterns of laser strikes on US aircraft (this report)  
-* HTML - http://www.airsafe.com/analyze/laser_strikes.html  
-* Rmd - http://www.airsafe.com/analyze/laser_strikes.Rmd  
-* R (background analysis) - http://www.airsafe.com/analyze/laser_strikes.R  
-* RPubs - http://rpubs.com/airsafe/lasers  
+Patterns of laser strikes on US aircraft (this report)
+
+* HTML - http://www.airsafe.com/analyze/laser_strikes.html
+* Rmd - http://www.airsafe.com/analyze/laser_strikes.Rmd
+* R (background analysis) - http://www.airsafe.com/analyze/laser_strikes.R
+* RPubs - http://rpubs.com/airsafe/lasers
 
