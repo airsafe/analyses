@@ -1,0 +1,691 @@
+---
+title: "Observed racial disparities in the Boston Police Department FIO program"
+author: "Todd Curtis"
+date: "January 27, 2016"
+output: html_document
+---
+
+```{r, echo=FALSE}
+
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+if("e1071" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("e1071")}
+library(e1071)
+
+# Note that raw data was pre-processed to exclude non-English content
+fio.raw = read.csv("Boston_Police_Department_FIO.csv")
+fio=fio.raw
+
+# Changing column names to capitalize first letter only
+simpleCap <- function(x) {
+        s <- strsplit(x, " ")[[1]]
+        paste(toupper(substring(s, 1,1)), substring(s, 2),
+              sep="", collapse=" ")
+}
+colnames(fio) = tolower(colnames(fio))
+colnames(fio) = lapply(colnames(fio),simpleCap)
+
+# ====== FUNCTIONS ===========
+# The following functions are defined for this analysis
+
+# whales function - Create a summary data table showing how many times a 
+# particular Subject (uniquely identified entitity) is associated with a
+# collection of records, and also includes the contribution to the cumulative
+# distribution function for each individual.
+whales = function(df,df.vname){
+        # To get the number of of times an entity ID shows up, several steps (using Officer_id as exapmle)
+        # 1. Get a sorted table showing how many times each unique ID shows up
+        # Each row of the resulting data frame represents one individual
+        yy = which(colnames(df)==df.vname)
+        uni.df = as.data.frame(sort(table(df[,yy]), descending = TRUE))
+        colnames(uni.df) = "Total"
+        uni.df$Subject = rownames(uni.df)
+        # Removing leading and trailing spaces
+        uni.df$Subject = stripper(uni.df$Subject) 
+        uni.df$Total = as.numeric(as.character(uni.df$Total))
+        
+        # Recall, each row is for one Subject
+        uni.df$Cum_subject = 1:nrow(uni.df) 
+        uni.df$Cum_fios = cumsum(uni.df$Total)
+         # Last column adds number ofccurrences represented by 
+         # the subset of Subjects with 'X' or more occurrences 
+        uni.df$Frac_fios = round(100*(uni.df$Total/sum(uni.df$Total)), digits=3)
+       
+        uni.df$Cdf_subject = round(100*(uni.df$Cum_subject/nrow(uni.df)), digits=3)
+        uni.df$Cdf_fios = round(100*(uni.df$Cum_fios/sum(uni.df$Total)), digits=3)
+        return(uni.df)
+}
+
+# stripper function definition
+# This function removes leading and trailing spaces from a vector.
+# The first step is to ensure the vector 'x' is character type by using 'as.character()' function.
+# The next step is to remove the leading space characters, including leading tab, 
+#       newline, vertical tab, form feed, carriage return, and space:
+# 
+#      - x = sub("^[[:space:]]+", "", x) 
+#
+# Trailing spaces can be removed in a simlar fashion:
+#      - str = sub("[[:space:]]+$", "", str)
+#      
+# Notes:
+#      - The "$" character is the end of string character, "^"is beginning of string character
+#      - Note that without the "+", only the first instance would be removed
+
+stripper <- function(x){
+        x = as.character(x)
+        x = sub("[[:space:]]+$", "", x) # Remove leading space characters
+        x = sub("^[[:space:]]+", "", x) # Remove trailing space characters
+        return(x)
+}
+
+
+# The variables 'Seq_num' and 'Fio_id' are both unique identifiers, and from the 
+# data dictionary, 'Seq_num' is used internally by the BPD and 'Fio_id' is the 
+# identifier for a specific record, so 'Seq_num' was considered redundant and
+# deleted from further analysis.
+
+fio$Seq_num = NULL
+
+# Ensure remaining unique identifier is of type character
+fio$Fio_id = as.character(fio$Fio_id)
+
+# From data dictionary and inital analysis, other redundant (one-to-one relationship)
+# variables were identified by first using the following combination of functions:
+# lapply(apply(fio,2,unique),length)
+
+# Redundant variable groups typically had one or more description variables and an 
+# ID value for each unique description, or had at least one redundant variable:
+# 'Dist' and 'Dist_id'
+# 'Supervisor' and 'Supervisor_id' (Almost)
+# 'Officer' and 'Officer_id' 
+# 'Off_dist' and 'Off_dist_id' 
+# 'fio_date' and 'fio$Fio_time' (all comparable entries identical)
+# 'Description', Race_id', and 'Race_desc'
+fio$Dist = NULL
+fio$Officer = NULL
+fio$Off_dist_id = NULL
+fio$Fio_time = NULL
+fio$Description = NULL
+fio$Race_desc = NULL
+
+# A number of other variables were eliminated from further 
+# analysis as they were not relevant to this particular study
+
+# 'Active_id' was identical for every entry
+fio$Active_id = NULL
+
+# 'Fio_date' is the preliminary date, and 'Fio_date_corrected' 
+# is more authoritative, and the only one relevant to this analysis, 
+# so all other date variables were eliminated.
+fio$Fio_date = NULL
+fio$First_inserttime = NULL
+fio$Last_updatetime = NULL
+fio$Sup_entrydate = NULL
+
+# Who enter the data and who last updated the database was not central to the analysis, 
+# so these too was eliminated
+fio$Last_updateby = NULL
+fio$Enteredby = NULL
+
+# The inputs for the remaining variables could be either characters, numbers, or dates
+date.vars = c("Fio_date_corrected")
+num.vars = c("Age_at_fio_corrected", "Veh_year_num")
+num.vars.ndx = which(colnames(fio) %in% num.vars) # Index of date or numerical variables
+non.char.vars = union(date.vars,num.vars) # Names of non-character variables
+non.char.ndx = which(colnames(fio) %in% non.char.vars) # Index of date or numerical variables
+char.vars = colnames(fio)[-non.char.ndx] # Character variables
+
+# The following provides the index of the character variables (non-date and non-numerical)
+char.vars.ndx = which(colnames(fio) %in% char.vars) # Index of character variables
+
+# Ensure character variables are of type character
+
+# First, make everything as.character
+fio = as.data.frame(apply(fio, 2, as.character)) 
+
+# Strip out any leading or trailing spaces
+fio = as.data.frame(apply(fio, 2, stripper)) 
+
+# Now make sure non-numeric variables (which include datas)
+# are made into character variables
+fio[,-non.char.ndx] = apply(fio[,-non.char.ndx],2, as.character)
+
+# Ensure each numeric variable is of type numeric
+fio[,num.vars.ndx] = apply(fio[,num.vars.ndx],2, as.numeric)
+# apply(fio,2,typeof)
+
+# Change Timestamp to as.POSIXlt which has elements in a list
+fio$Date = as.POSIXlt(fio$Fio_date_corrected, format="%m/%d/%y %H:%M")
+fio$Year = fio$Date$year + 1900 # Years indexed from 1900
+fio$Month = fio$Date$mon + 1 # Months indexed from zero
+# Convert months from character to numeric 
+fio$Month = as.numeric(as.character(fio$Month))
+# Convert to month
+fio$Month = month.abb[fio$Month]
+fio$Day = fio$Date$mday
+fio$Weekday = weekdays(as.Date(fio$Date), abbreviate = TRUE)
+
+# Create a racial identifier factors and order them as they are in a calendar
+fio$Month = factor(fio$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
+                                      "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
+
+# Make months factors and order them as they are in a calendar
+fio$Month = factor(fio$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
+         "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
+
+# Make days into factors and order them as they are in a calendar
+fio$Weekday = factor(fio$Weekday,levels=c("Sun","Mon","Tue",
+                                                "Wed","Thu","Fri","Sat"), ordered=TRUE)
+
+# Converting the variable "Date" into Date format from as.POSIXlt format
+# So the dates can be ranked by number of FIO reports
+fio$Date = as.Date(fio$Date)
+superdates = whales(fio,"Date")
+
+# =============
+# Inserting NA values where appropriate
+# =============
+# Numerous variables have missing variables. From an inspetion of the raw data, the following 
+# variables had the following kinds of missing data, or categories of data that will be 
+# treated as NA data. The variables and the data categories for each variable, are below:
+
+fio$Sex[which(fio$Sex=="UNKNOWN")] = NA # Sex - UNKNOWN 
+fio$Sex[which(fio$Location=="")] = NA # Location - blank entries
+fio$Clothing[which(fio$Clothing=="")] = NA # Clothing - blank entries
+fio$Complexion[which(fio$Complexion=="NO DATA ENTERED")] = NA # Complexion - NO DATA ENTERED
+fio$Priors[which(fio$Priors=="")] = NA # Priors - blank entries
+fio$Search[which(fio$Search=="")] = NA # Search - blank entries
+fio$Basis[which(fio$Basis=="")] = NA # Basis - blank entries
+fio$Stop_reasons[which(fio$Stop_reasons=="")] = NA # Stop_reasons - blank entries
+fio$Outcome[which(fio$Outcome=="")] = NA # Outcome - blank entriesc
+
+# Veh_make - "N/A" or "NO DATA ENTERED"
+fio$Veh_make[which(fio$Veh_make=="N/A" |fio$Veh_make=="NO DATA ENTERED") ] = NA
+
+fio$Veh_year_num[which(fio$Veh_year_num==0)] = NA # Veh_year_num - 0
+
+# Veh_color - N/A or "NO DATA ENTERED"
+fio$Veh_color[which(fio$Veh_color=="N/A" |fio$Veh_color=="NO DATA ENTERED") ] = NA
+
+fio$Veh_model[which(fio$Veh_model=="")] = NA # Veh_model - blank entries
+fio$Veh_occupant[which(fio$Veh_occupant=="")] = NA # Veh_occupant -  blank entries
+
+# Veh_state - "NO DATA ENTERED" or "OTHER"
+fio$Veh_state[which(fio$Veh_state=="OTHER" |fio$Veh_state=="NO DATA ENTERED") ] = NA
+
+# Supervisor_id - NA (no action needed)
+
+fio$Off_dist[which(fio$Off_dist=="")] = NA # Off_dist_id - 9999
+
+fio$Ethnicity[which(fio$Ethnicity=="")] = NA # Ethnicity - NA 
+# (Also, lack of consistency in definitions)
+
+fio$Race_id[which(fio$Race_id=="9999")] = NA # Race_id - 9999
+
+
+# Last added variable is a modified BPD race code
+# Note: A review of the BPD raw data revealed that the codes are as follows: 
+# 0 - No Data entered; 1 - Asian or pacific islander; 2 - Black; 3 - Hispanic; 
+# 4 - White; 5 - American Indian/Alaska native; 6 - Middle East/East indian
+# There is also an Unknown category with no code. For purposes of this analysis,
+# Unknown and No Data Entered are defined as NA, and Asian, Middle East, and 
+# American Indian/Alaska native were combined. This results in five categories:
+# Black (code 2), White (Code 4), Hispanic (Code 3) , Other (Codes 1,5, and 6).
+# NA values (Unknown plus Code 0) were exluded from any analysis
+# of possible racial descrepancies.
+
+# Create racial identification codes based on those provided by the BPD
+# and order them by how likely they are to occur in the FIO database.
+# Categories with smaller populations may be combined in the following analysis.
+
+# Define a race.code vector which creates four racial categories plus an NA category
+race.code = fio$Race_id # Start with the codes assigned by the BPD
+race.code[which(fio$Race_id =="0")] = NA
+race.code[which(fio$Race_id =="2")] = "Black"
+race.code[which(fio$Race_id =="3")] = "Hispanic"
+race.code[which(fio$Race_id =="4")] = "White"
+
+# Three codes which combined accounted for just over 1% of FIO reports were combined.
+race.code[which(fio$Race_id =="1" | fio$Race_id =="5" | fio$Race_id =="6")] = "Other"
+race.code = ordered(race.code, levels=c("Black","White","Hispanic","Other"))
+fio$Race_code = race.code # Add this race code to the fio data frame
+
+# =======
+# Following data frame orders officers by the number of FIO reports submitted
+supercops = whales(fio,"Officer_id")
+superstreets = whales(fio,"Street_id")
+
+
+# === WHALE HUNTING===
+# WHALE HUNTING: Top Dates
+# The top 20% of performers are 20% of dates covered by the study which had
+# the highest number of FIO submissions.
+
+top20.dates = ceiling(0.20*nrow(superdates))
+top20.dates.ndx = (nrow(superdates)-(top20.dates-1)):nrow(superdates) 
+
+# Now lets see how the top 1% of dates performed, where the number of dates
+# is determined by taking 1% of the dates during the study period.
+
+# If 1% of the dates is not a whole number, this value is
+# rounded up to the next whole number
+top1.dates = ceiling(0.01*nrow(superdates))
+top1.dates.ndx = (nrow(superdates)-(top1.dates-1)):nrow(superdates) 
+
+
+# WHALE HUNTING: Top streets
+
+# The top 20% and top 1% streets are determined in a manner similar to what
+# was done above for dates.
+
+top20.streets = ceiling(0.20*nrow(superstreets))
+top20.streets.ndx = (nrow(superstreets)-(top20.streets-1)):nrow(superstreets) 
+
+top1.streets = ceiling(0.01*nrow(superstreets))
+top1.streets.ndx = (nrow(superstreets)-(top1.streets-1)):nrow(superstreets) 
+
+
+# WHALE HUNTING: Top cops
+
+# The top 20% and top 1% BPD are determined in a manner similar to what
+# was done above for dates and streets.
+top1 = ceiling(0.01*nrow(supercops))
+top1.ndx = (nrow(supercops)-(top1-1)):nrow(supercops) 
+
+top20 = ceiling(0.20*nrow(supercops))
+top20.ndx = (nrow(supercops)-(top20-1)):nrow(supercops) 
+
+# ================= TOP QUARTILE ===========================
+# The top quntile can be specified in the fio data frame as follows:
+fio.top20 = fio$Officer_id %in% supercops$Subject[top20.ndx]
+fio.top20.ndx = which(fio$Officer_id %in% supercops$Subject[top20.ndx])
+
+
+# Racial comparisons
+
+# Will now compare actual and expected FIOs by race and by key officer groups
+# (Top quintile and all others) to see if racial disparities can be identified.
+# It is assumed that in the FIOs the assignment of a racial category to a Subject
+# is consistently and objecively determined by all officer groups. 
+# Top quintile performers and the other officers.
+# For example, if 10% of all FIO reports are of category X, then
+# both top quintile performers and other other officers should have
+# about 10% of their FIOs in those categores
+
+
+# Note: A review of the BPD raw data revealed that the codes are as follows: 
+# 0 - No Data entered; 1 - Asian or pacific islander; 2 - Black; 3 - Hispanic; 
+# 4 - White; 5 - American Indian/Alaska native; 6 - Middle East/East indian
+# There is also an Unknown category with no code. For purposes of this analysis,
+# Unknown and No Data Entered are defined as NA, and Asian, Middle East, and 
+# American Indian/Alaska native were combined. This results in five categories:
+# Black (code 2), White (Code 4), Hispanic (Code 3) , Other (Codes 1,5, and 6).
+# NA values (Unknown plus Code 0) were exluded from any analysis
+# of possible racial descrepancies.
+
+# Create racial identification codes based on those provided by the BPD
+# and order them by how likely they are to occur in the FIO database.
+# Categories with smaller populations may be combined in the following analysis.
+
+# Define a race.code vector which creates four racial categories plus an NA category
+race.code = fio$Race_id # Start with the codes assigned by the BPD
+race.code[which(fio$Race_id =="0")] = NA
+race.code[which(fio$Race_id =="2")] = "Black"
+race.code[which(fio$Race_id =="3")] = "Hispanic"
+race.code[which(fio$Race_id =="4")] = "White"
+
+# Three codes which combined accounted for just over 1% of FIO reports were combined.
+race.code[which(fio$Race_id =="1" | fio$Race_id =="5" | fio$Race_id =="6")] = "Other"
+race.code = ordered(race.code, levels=c("Black","White","Hispanic","Other"))
+
+race.id = !is.na(race.code) # Vector of FIO reports with a racial ID
+
+# race.id = !is.na(fio$Race_id) # Vector of FIO reports with a racial ID
+
+# All with a race ID
+# all.by.race = as.vector(table(fio$Race_id)) # all by race
+all.by.race = as.vector(table(race.code)) # all by race
+all.by.race.prob = round(all.by.race/sum(race.id),4) # This is the P(race category X)
+
+# == Top qunitile ==
+# Top quintile FIOs by race
+# top20.by.race = as.vector(table(fio$Race_id[fio.top20 & race.id])) 
+top20.by.race = as.vector(table(race.code[fio.top20 & race.id])) 
+# P(Top quintile submits FIO report)
+top20.by.race.prob = round(sum(fio.top20 & race.id)/sum(race.id),4) 
+top20.by.race.expected = round(top20.by.race.prob*all.by.race,2)
+
+# == Bottom four quintiles (bottom 80%) ==
+# Other officers FIOs by race
+# bot80.by.race = as.vector(table(fio$Race_id[(!fio.top20 & race.id)])) 
+bot80.by.race = as.vector(table(race.code[(!fio.top20 & race.id)])) 
+# 1 - P(Top quintile submits FIO report)
+bot80.by.race.prob = round(sum(!fio.top20 & race.id)/sum(race.id),4) 
+bot80.by.race.expected = round(all.by.race*(sum(!fio.top20 & race.id)/sum(race.id)),2)
+
+
+race.table = cbind(names(table(race.code)),
+                   all.by.race, 
+                   all.by.race.prob,
+                   top20.by.race,
+                   top20.by.race.prob,
+                   top20.by.race.expected,
+                   bot80.by.race,
+                   bot80.by.race.prob,
+                   bot80.by.race.expected)
+
+colnames(race.table) = c("Race","Reports","Fraction","Top20", "Top20_prob", "Top20_expected",
+                         "Bot80", "Bot80_prob", "Bot80_expected")
+
+# Ensure that race.table is a data frame
+race.table = as.data.frame(race.table)
+# Ensure all of the numeric rows are numeric
+race.table[,-1] = apply(race.table[,-1],2,as.character)
+race.table[,-1] = apply(race.table[,-1],2,as.numeric)
+# This analysis found 562 with NA (blank) value for race, and BPD included them in
+# their analysis
+
+```
+
+###Summary###
+A review Boston Police Department (BPD) Field Interrogation and Observation (FIO) data from the period 2011-April 2015 revealed that among the BPD officers who submitted FIO reports in that period, the 20% of the officers who submitted the most FIO reports were significantly more likely to have encounters with black suspects, and the remaining group of officers were more likely to have encounters with suspects of other racial groups. Other key findings included the following:
+
+- There were a total of `r format(nrow(fio), big.mark=",")` FIO reports during the `r length(seq(from=min(fio$Date), to=max(fio$Date), by='month'))`-month period covered by the data.
+
+- Among the `r format(nrow(supercops), big.mark=",")` BPD officers who submitted at least one FIO report, the 20% of the officers who accounted for the most FIO reports were responsible for `r format(100*mean(fio.top20), digits=4)`% of all reports.
+
+- `r format(100*mean(race.id), digits=3)`% of the FIO reports had an assigned racial category, and of those FIO reports with an assigned racial categories, `r format(100*sum(race.table$Fraction[1:3]), digits=3)`% were either black, white, or Hispanic.
+
+- If the BPD officers are split into two groups, the 20% accounting for `r format(100*mean(fio.top20), digits=4)`% and the 80% who account for the remaining percentage, one can reject the null hypothesis that the racial distribution of the FIO submissions of these two groups are similar.
+
+###Introduction###
+The Boston Police Department uses proactive policing tactics, including the t Field Interrogation, Observation, Frisk, and/or Search program (referred to in this report as FIO) to disrupt criminal activities. In the FIO program, someone who the BPD officer believes is involved with some criminal activity, may be observed or even stopped and searched by that officer. 
+
+According to the BPD, FIO reports provide officers with a mechanism to document up-to-date information regarding known criminals and their associates for law enforcement purposes and include situations ranging from observation without any interaction to consensual encounters with an individual to a stop and frisk or search. 
+
+The FIO reports that were used in this analysis contained information on the date and location of the FIO activity, as well as demographic information about the officers and suspects involved in the FIO encounter. 
+
+In a study of an earlier set of FIO data from 2007-2010, Jeffrey Fagan of Columbia Law School and School of Public Health, and Anthony A. Braga of the School of Criminal Justice at Rutgers University in Newark (and a research fellow at the Kennedy School at Harvard) focused on racial disparity when it came to the race of the officers and of the persons who were the subject of FIO reports, and found that there were racial disparities when it came to the treatment of people subject to an FIO encounter, specifically the likelihood of being frisked and searched ([An Analysis of Race and Ethnicity Patterns in Boston Police Department
+Field Interrogation, Observation, Frisk, and/or Search Reports](http://airsafe.com/analyze/bpd_fio_207_2011_study.pdf)). 
+
+As part of the BPD's effort to maintain transparency about the FIO process, in early January 2016, [BPD released a set of data covering the period from January 2011 to April 2015, along with a few summary statistics about the data](http://bpdnews.com/news/2016/1/7/commissioner-evans-continues-efforts-to-increase-transparency-and-accountability-of-policing-activities-to-the-public). 
+
+The BPD also stated that their analysis of that data was not yet complete, and implied that their intention with their analysis was to show decreases in the kinds of disparities observed in the earlier study.
+
+
+####Who is this report for?####
+This report may be useful for the following kinds of groups:
+
+* Anyone who is interested in the policing practices of the BPD, in the patterns of suspected criminal activity in Boston, and racial makeup of those who were subjected to the BPD's FIO process.
+
+* Organizations and individuals who are concerned about possible discriminatory policing practices by the BPD.
+
+* Law enforcement agencies who are interested in the experiences of the BPD when it comes to implementing proactive policing practices similar to the FIO program.
+
+###Methods and Data###
+After downloading the data and removing variables that were either redundant or were not relevant to the analysis, the data was first in order to create  summaries of the data with respect to how the FIO reports were distributed by day of the week, month of the year, and by racial category of those subjected to an FIO encounter, and to identify the populations for BPD officers and the locations within Boston that were responsible for a disproportionate share of FIO reports.
+
+The BPD officers were divided into a pair of categories, the 20% of the officers with the most FIO reports, and all other officers who submitted at least one FIO report, and these two groups were compared with respect to the proportion of FIO reports involving specific racial groups.
+
+This division was directly related to the intent of this analysis - to explore the possible racial disparities in the officers conducting the FIO encounters based on the officers' performance, rather than their race. In contrast, one of the analytical strategies in the earlier study by Fagan and Braga involved looking at the officers' race to see if there was a relationship between the race of the officers and the rate at which youths from a particular racial group were stopped.
+
+####FIO data preparation ####
+The [FIO data was downloaded from a City of Boston site](https://data.cityofboston.gov/Public-Safety/Boston-Police-Department-FIO/xmmk-i78r) that provided the data in numerous formats. For this analysis, the CSV version of the data was downloaded. 
+
+This data was a redacted version of the full FIO data, excluding any personal identifying information about those who were subject to an FIO encounter. Unlike the data used in the earlier study of Fagan and Braga, the data released by the BPD in January 2016 did not contain data that would associate an FIO report with a particular suspect.
+
+Upon request, the BPD also provided a [data dictionary that defined 43 of the 44 variables in the database](http://airsafe.com/analyze/fio_data_dictionary.pdf).  For the analysis done for this study, the raw FIO was processed and updated in the following ways:
+
+- Fourteen of the variables were removed because they were either redundant, or if they did not add potentially useful information for this particular study. 
+
+- For consistency, variables with blank entries, or with an entry code indicating missing or unknown data, were changed to NA for Not Available. NA is a code used in R, the statistical analysis program used for this analysis.
+
+- Six variables were added, five of which were related to a transformation of the date of of the FIO encounter, and the sixth of which was a transformation of a variable describing the racial identity of the subject of the FIO encounter. 
+
+A review of the BPD raw data revealed that seven codes were used for a racial identifier, and five of those were combined in the racial identity variable that was added. Two of codes in the raw data indicated no data entered, or unknown, and they were changed to NA. Three of the codes, for Asian, Middle East/East Indian, and American Indian/Alaska native, were combined into one code (Other) for two reasons. First, this analysis was primarily concerned with racial disparities among FIO reports involving black, white, and Hispanic subjects, and second because less than 2% of FIO reports involved other races.
+
+This transformed FIO data is available at the the following address: http://www.airsafe.com/analyze/fio_airsafe.csv
+
+###Summary and overview of the data###
+
+- From 2011 to April 2015, `r format(nrow(fio), digits=6, big.mark = ",")` FIO reports were submitted by `r format(nrow(supercops), digits=4, big.mark = ",")` BPD officers. 
+
+- During this 52-month period, there were and average of `r format(nrow(fio)/1581, digits=3)` FIO encounters per day, with as many as `r max(table(fio$Date))` and as few as`r min(table(fio$Date))` in a single day. The median number of daily laser encounters was `r median(table(fio$Date))[[1]]`.
+
+####FIOs by day of the week and month of the year####
+Below are a series of graphics illustrating the distribution of FIO reports by day of the week and month of the year. Because the data from 2015 covered only the first four months of the year, the following graphics are limited to the years 2011-2014.
+
+Below are the totals for the number of FIO reports by month for the period 2011-2014, both as numerical values and a bar graph.
+
+
+```{r, echo=FALSE}
+table(fio$Weekday[fio$Year<2015])
+
+barplot(table(fio$Weekday[fio$Year<2015]),
+        main = "FIO reports by weekday (2011-2014)",
+        xlab = "Day of the week",
+        ylab = "FIO reports",
+        col = "dodgerblue")
+```
+
+Below are the totals for the number of FIO reports by day of the week for the same time period , also as numerical values and a bar graph.
+
+```{r, echo=FALSE}
+table(fio$Month[fio$Year<2015])
+
+barplot(table(fio$Month[fio$Year<2015]),
+        main = "FIO reports by month (2011-2014)",
+        xlab = "Month",
+        ylab = "FIO reports",
+        col = "dodgerblue",
+        cex.names = 0.7)
+
+
+
+```
+Below is a table showing the number of FIOs reports for a combination of a day of the week and month of the year for the years 2011-2014.
+
+####Heat maps of FIO encounters by weekday and month####
+It is also possible to visually depict FIO distribution by weekday and month using heat maps. The heat map would reflect the data in the previous table, with the 84 cells representing a combination of the month and day of the week. The colors correspond to a level of intensity with white being on the low end of the scale and dark blue on the upper end. 
+
+As is the case with the bar graphs above, it can be easier to get a sense of the busiest days of the week and months of the year by using visual representations of the numerical data.
+
+Below is a matrix showing the number of FIO reports by both day of the week and month of the year for 2011-2014, followed by a heat map of the same information. In the heat map, the darkest cell corresponds to the cell (combination of month and day of the week) with the most FIO reports.
+
+```{r, echo=FALSE}
+table(fio$Month[fio$Year<2015], fio$Weekday[fio$Year<2015])
+
+if("stats" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("stats")}
+library(stats)
+# Heat maps will use a color pallette that goes from white for lowest to dark blue for the highest value
+palette = colorRampPalette(c('#ffffff','#0000ff'))(64)
+
+heatmap(table(fio$Month[fio$Year<2015], fio$Weekday[fio$Year<2015]),
+        Rowv=NA, Colv=NA, revC=TRUE, 
+        scale="none", col = palette,  margins=c(7,7), 
+        main="FIO reports by day of the week and month")
+
+```
+
+####FIO distribution by race####
+A total of `r format(sum(!is.na(fio$Race_code)), big.mark=",")` FIO reports, or `r format(100*sum(!is.na(fio$Race_code))/nrow(fio), digits=4)`% of all FIO reports had a racial identity assigned by the BPD. Of those FIO reports with an assigned racial identity,  `r format(100*(length(which(!is.na(fio$Race_code))) -length(which(fio$Race_code=="Other")))/length(which(!is.na(fio$Race_code))), digits=4)`% of these being either black (`r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=4)`%), bhite (`r format(100*length(which(fio$Race_code =="White"))/sum(!is.na(fio$Race_code)), digits=4)`%), or Hispanic (`r format(100*length(which(fio$Race_code =="Hispanic"))/sum(!is.na(fio$Race_code)), digits=4)`%). 
+
+Below is the breakdown of FIO reports by race, excluding FIO reports with no race identifier and with the following racial identifiers grouped into the "All other" category: Asian, Middle East/East Indian, and American Indian/Alaska native.
+
+```{r, echo=FALSE}
+table(fio$Race_code)
+
+barplot(sort(table(fio$Race_code),decreasing=TRUE),
+        main = "FIO reports by race",
+        xlab = "Race identifier",
+        ylab = "FIO reports",
+        col = "dodgerblue")
+```
+
+####Officers, places, and dates with the most FIO reports####
+The previous tables and graphs imply that FIOs are not evenly distributed in time, with some days of the week and months of the year consistently accounting for a greater number of FIO reports. The situation is more pronounced when focusing on the officers who submit FIO reports and the locations where FIO encounters happen.
+
+The following sections compare how many FIO reports are represented by the top 1% and 20% of the `r format(nrow(superdates), big.mark=",")` calendar days that elapsed during the study, the `r format(nrow(supercops), big.mark=",")` officers submitting the reports, and the `r format(nrow(superstreets), big.mark=",")` locations where FIO encounters occurred. 
+
+The locations were not addresses, but rather unique street identification codes assigned by the BPD. Also, if it 1% or 20% of a group (day, officer, or location) was not a whole number, the number chosen was rounded up by one.
+
+####Dates with the most FIO reports####
+
+**Top 20%** - `r length(top20.dates.ndx)` dates, representing the top `r format(100*length(top20.dates.ndx)/nrow(superdates), digits=4)`% of the `r format(nrow(superdates),big.mark = ",")` dates included in FIO reports during the study period, were responsible for `r format(100- superdates$Cdf_fios[top20.dates.ndx[1]-1], digits=4)`% of the total FIO reports, averaging `r format(mean(superdates$Total[top20.dates.ndx]), big.mark = ",", digits = 4)` FIO reports per day.
+
+**Top 1%** - `r length(top1.dates.ndx)` dates, representing the top `r format(100*length(top1.dates.ndx)/nrow(superdates), digits=3)`% of the `r format(nrow(superdates),big.mark = ",")` dates included in FIO reports during the study period, were responsible for `r format(100- superdates$Cdf_fios[top1.dates.ndx[1]-1], digits=3)`% of the total FIO reports, averaging `r format(mean(superdates$Total[top1.dates.ndx]), big.mark = ",", digits = 4)` FIO reports per day.
+ 
+      
+####Street locations with the most FIO reports####
+**Top 20%** - `r length(top20.streets.ndx)` street ID locations, representing the top `r format(100*length(top20.streets.ndx)/nrow(superstreets), digits=3)`% of the `r format(nrow(superstreets),big.mark = ",")` street ID locations included in FIO reports during the study period, were responsible for `r format(100- superstreets$Cdf_fios[top20.streets.ndx[1]-1], digits=4)`% of the total FIO reports, averaging `r format(mean(superstreets$Total[top20.streets.ndx]), big.mark = ",", digits = 4)` FIO reports per day.
+
+**Top 1%** - `r length(top1.streets.ndx)` street ID locations, representing the top `r format(100*length(top1.streets.ndx)/nrow(superstreets), digits=3)`% of the `r format(nrow(superstreets),big.mark = ",")` street ID locations included in FIO reports during the study period, were responsible for `r format(100- superstreets$Cdf_fios[top1.streets.ndx[1]-1], digits=3)`% of the total FIO reports, averaging `r format(mean(superstreets$Total[top1.streets.ndx]), big.mark = ",", digits = 4)` FIO reports per day. 
+
+####BPD officers with the most FIOs####
+**Top 20%** - `r length(top20.ndx)` BPD officers, representing the top `r format(100*length(top20.ndx)/nrow(supercops), digits=3)`% of the `r format(nrow(supercops),big.mark = ",")` BPD officers who submitted at least one FIO report during the study period, were responsible for `r format(100- supercops$Cdf_fios[top20.ndx[1]-1], digits=4)`% of the total FIO reports, averaging `r format(mean(supercops$Total[top20.ndx]), big.mark = ",", digits = 4)` FIO reports per officer.
+
+**Top 1%** - `r length(top1.ndx)` BPD officers, representing the top `r format(100*length(top1.ndx)/nrow(supercops), digits=3)`% of the `r format(nrow(supercops),big.mark = ",")` BPD officers who submitted at least one FIO report during the study period, were responsible for `r format(100- supercops$Cdf_fios[top1.ndx[1]-1], digits=3)`% of the total FIO reports, averaging `r format(mean(supercops$Total[top1.ndx]), big.mark = ",", digits = 4)` FIO reports per officer. 
+
+###Testing for racial disparities####
+The focus of this study is on possible racial disparities between two groups of BPD officers, the 20% of the officers who generated the most FIO reports, and all of the other officers. 
+
+A chi-square test was run on the data that describes the racial breakdown of FIO reports of the top 20% of performers compared with the other 80% of officers. If there was no significant there would be little difference in the racial breakdown of their reports. However, this is apparently not the case, as will be show two ways. First, with a chi-square test and second using a visual comparison.
+
+Of the `r format(nrow(fio),big.mark = ",")` FIO reports, `r format(sum(is.na(race.code)),big.mark = ",")`, or `r format(100*sum(is.na(race.code))/nrow(fio), digits=3)`% did not specify a specific racial category and were excluded from the chi-square test. There were a total of eight categories corresponding to the two officer groups and the four racial groups (black, white, Hispanic, and other).
+
+```{r, echo=FALSE}
+race.id = !is.na(race.code) # Vector of FIO reports with a racial ID
+
+# race.id = !is.na(fio$Race_id) # Vector of FIO reports with a racial ID
+
+# All with a race ID
+all.by.race = as.vector(table(race.code)) # all by race
+all.by.race.prob = round(all.by.race/sum(race.id),4) # This is the P(race category X)
+
+# top20.by.race = as.vector(table(fio$Race_id[fio.top20 & race.id])) 
+top20.by.race = as.vector(table(race.code[fio.top20 & race.id])) 
+# P(Top quintile submits FIO report)
+top20.by.race.prob = round(sum(fio.top20 & race.id)/sum(race.id),4) 
+top20.by.race.expected = round(top20.by.race.prob*all.by.race,2)
+
+# == Bottom four quintiles (bottom 80%) ==
+# Other officers FIOs by race
+# bot80.by.race = as.vector(table(fio$Race_id[(!fio.top20 & race.id)])) 
+bot80.by.race = as.vector(table(race.code[(!fio.top20 & race.id)])) 
+# 1 - P(Top quintile submits FIO report)
+bot80.by.race.prob = round(sum(!fio.top20 & race.id)/sum(race.id),4) 
+bot80.by.race.expected = round(all.by.race*(sum(!fio.top20 & race.id)/sum(race.id)),2)
+
+
+race.table = cbind(names(table(race.code)),
+                   all.by.race, 
+                   all.by.race.prob,
+                   top20.by.race,
+                   top20.by.race.prob,
+                   top20.by.race.expected,
+                   bot80.by.race,
+                   bot80.by.race.prob,
+                   bot80.by.race.expected)
+
+colnames(race.table) = c("Race","Reports","Fraction","Top20", "Top20_prob", "Top20_expected",
+                         "Bot80", "Bot80_prob", "Bot80_expected")
+
+# Ensure that race.table is a data frame
+race.table = as.data.frame(race.table)
+# Ensure all of the numeric rows are numeric
+race.table[,-1] = apply(race.table[,-1],2,as.character)
+race.table[,-1] = apply(race.table[,-1],2,as.numeric)
+# This analysis found 562 with NA (blank) value for race, and BPD included them in
+# their analysis
+
+# Now for a chi-square test to see if the  observed values differ greatley from expected
+chival.x = c(race.table$Top20,race.table$Bot80)
+chival.p = c(race.table$Top20_expected,race.table$Bot80_expected)
+chisq.result = chisq.test(chival.x, p=chival.p, rescale.p = TRUE)
+chisq.result
+
+```
+
+The chi-square test with `r chisq.result[[2]][[1]]` degrees of freedom produced a value of `r format(chisq.result[[1]][[1]],digits=5)`. Given the number of degrees of freedom, the null hypothesis of there being no significant differences in the racial breakdowns of the FIO reports for these two groups of officers would be rejected at the 0.05 level for chi-square values above 14.067, and in this case the value was well above this level.
+
+###Visual depiction of racial disparities####
+The second way to show this disparity in reporting is visually. Below is a grouped bar chart showing the likelihood that an FIO report involved a combination of a particular combination of racial group and BPD officer category.
+
+```{r, echo=FALSE}
+# This compares top performers and bottom performers with respect to 
+# how much more or less likely that officer group would have an FIO 
+# report involving a person from a particular race.
+races = as.character(race.table$Race)
+Allratio = race.table$Reports/race.table$Reports
+Top20_ratio = race.table$Top20/race.table$Top20_expected
+Bot80_ratio = race.table$Bot80/race.table$Bot80_expected
+
+bpd.comp = as.matrix(rbind(Allratio,Top20_ratio,Bot80_ratio))
+colnames(bpd.comp) = races
+rownames(bpd.comp) = c("All BPD", "Top 20%", "Other BPD")
+
+barplot(bpd.comp, main="Ratio of reporting rate and BPD average by race",
+        xlab="Race identifier", ylab="Ratio",
+        col=c("coral","azure","dodgerblue"), beside=TRUE)
+
+# Legend placed separately
+legend(10,1.6, rownames(bpd.comp), horiz = FALSE, 
+       cex = 0.8,
+       fill = c("coral","azure","dodgerblue" ))
+abline(h=1,col="darkblue")
+
+```
+
+The horizontal bar indicates a likelihood of a BPD officer group having an FIO report involving a particular racial group being equal to that of the entire population of BPD officers. The chart shows that the Top 20% officer group were slightly more likely to have black suspects in their FIO reports compared to other racial groups. Other BPD officers were somewhat less likely to have FIO reports on black suspects, but more likely than the Top 20% officer group to have FIO reports featuring suspects from other racial groups.
+
+####Top 20% FIO contribution by race####
+While the results of the chi-square test, as well as the previous visual comparison shows that there may be disparities in the distribution of FIO reports by race of the Top 20% BPD officer group compared with other BPD officers, it may help to put that result in context by looking at the influence that Top 20% group has, an influence that can be depicted using the earlier chart showing FIO reports by race, this time highlighting the proportion represented by the Top 20% of BPD officers.
+
+```{r, echo=FALSE}
+# FIO reports by officer category and race identifier
+barplot(table(fio.top20, race.code),
+        main = "FIO reports by race and officer group",
+        xlab = "Race identifier",
+        ylab = "FIO reports",
+        col = c("dodgerblue", "azure"))
+# Legend placed separately
+legend(3,70000, c("Top 20%", "Other BPD"), horiz = TRUE, 
+       cex = 0.8,
+       fill = c("azure", "dodgerblue"))
+```
+
+
+###Discussion###
+The FIO encounter data provided by the Boston Police Department (BPD) represents an important resource for investigating possible biases or disparities in how the FIO process is applied. This study was focused on two distinct groups from among the BPD officers who submitted FIO reports during the study period, the top 20% of officers who submitted the most FIO reports, and all of the other BPD officers who submitted FIO reports. 
+
+The patterns of FIO submissions show that these two groups have a statistically significant difference in the likelihood of a particular racial group being the subject of an FIO encounter, with the most productive officers being more likely to investigate black suspects, and the other group of officers being more likely to investigate suspects from other racial groups. 
+
+While these results clearly suggest that a racial disparity in FIO reporting exists, it does not address why these disparities exist, or to what extent that those who were subject to FIO encounters may have contributed to these disparities.
+
+The data provided by the BPD provided a unique identifier for each officer, making it possible to determine how many times an officer submitted an FIO report. However, there were no unique identifiers for the subjects of the FIO encounters, so there was no way to associate an FIO report with a particular suspect, and no way to see if a particular subgroup of suspects had a disproportionate contribution to the population of FIO reports.
+
+The data, in spite of the limitations caused by the redaction of identifying information of suspects, has other opportunities for investigating disparities, including disparities implied by the observation that like the case with police officers, specific groups of street locations and dates were also associated with a disproportionate number of FIO reports.
+
+###Resources###
+Redacted Boston Police Department FIO data from 2011-April 2015
+https://data.cityofboston.gov/Public-Safety/Boston-Police-Department-FIO/xmmk-i78r
+
+FIO data dictionary                                                    
+http://www.airsafe.com/analyze/fio_data_dictionary.pdf
+
+Boston Police Department overview of FIO data from 2011-April 2015
+http://www.airsafe.com/analyze/fio_data-frequency.pdf
+
+Processed FIO data used in this study                                    
+http://www.airsafe.com/analyze/fio_airsafe.csv
+
+Fagan and Braga study of FIO data from 2007-2010
+http://airsafe.com/analyze/bpd_fio_207_2011_study.pdf
+
+Observed racial disparities in the Boston Police Department FIO program (this report)
+
+* HTML - http://www.airsafe.com/analyze/bpd_fio.html
+* Rmd - https://github.com/airsafe/analyses/bpd_fio.Rmd
+* R (background analysis) - https://github.com/airsafe/analyses/bpd_fio.R
+* RPubs - http://rpubs.com/airsafe/bpd_fio
