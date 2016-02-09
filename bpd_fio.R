@@ -387,7 +387,7 @@ legend(3,60000, rownames(table.dat), horiz = FALSE,
 # Distribution of FIO per day for 2011-April 2015 (summary and plot)
 
 superdates = whales(fio,"Date") # Distribution of number of FIO reports for each day
-summary(date.contrib$Contribution) # Summary of number of FIO reports for each day
+summary(superdates$Contribution) # Summary of number of FIO reports for each day
 
 barplot(table(superdates$Contribution),
         main = "Distribution of daily FIO report submissions (2011 - April 2015)",
