@@ -472,16 +472,14 @@ A review Boston Police Department (BPD) Field Interrogation and Observation (FIO
     * `r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=3)`% were Hispanic, and 
     * `r format(100*length(which(fio$Race_code =="Other"))/sum(!is.na(fio$Race_code)), digits=2)`% were of other races.
 
-
 * Among the `r format(nrow(supercops), big.mark=",")` BPD officers who submitted at least one FIO report, the 20% of the officers who accounted for the most FIO reports were responsible for `r format(100*mean(fio.top20), digits=4)`% of all reports.
-
 
 * FIO submissions were highly concentrated, with 20% of the `r format(nrow(supercops), big.mark=",")` BPD officers who submitted FIO reports accounting for `r format(100*mean(fio.top20), digits=4)`% of all submissions. 
 
 * Compared to the 20% of the officers who submitted more than `r format(100*mean(fio.top20), digits=4)`% of the reports, the remaining BPD officers were less likely to submit FIO reports with a Black subject, and much more likely to submit FIO reports featuring Whites, Hispanics, and other racial groups.
 
 ###Introduction###
-The Boston Police Department uses proactive policing tactics, including the t Field Interrogation, Observation, Frisk, and/or Search program (referred to in this report as FIO) to disrupt criminal activities. In the FIO program, someone who the BPD officer believes is involved with some criminal activity, may be observed or even stopped and searched by that officer. 
+The Boston Police Department uses proactive policing tactics, including the Field Interrogation, Observation, Frisk, and/or Search program (referred to in this report as FIO) to disrupt criminal activities. In the FIO program, someone who the BPD officer believes is involved with some criminal activity, may be observed or even stopped and searched by that officer. 
 
 According to the BPD, FIO reports provide officers with a mechanism to document up-to-date information regarding known criminals and their associates for law enforcement purposes and include situations ranging from observation without any interaction to consensual encounters with an individual to a stop and frisk or search. 
 
@@ -780,15 +778,6 @@ Due to the limitations of the data, and the focus on looking for racial disparit
 ####FIO racial splits by BPD officer groups####
 If there are no racial disparities in the two officers groups, then there should be no significant differences between the percentage of the four racial groups (Black, White, Hispanic, and Other) in the FIO report populations of the two officer groups, and the percentages for the population as a whole. 
 
-Below is a table with the actual and estimated percentage of FIO reports by race for each officers group, as well as the expected number of FIO reports for those two groups. 
-
-```{r, echo=FALSE}
-chi.table = race.table[,c(1,4,6,7,9)]
-chi.table[,2:5] = round(100*chi.table[,2:5]/nrow(fio),1)
-colnames(chi.table) = c("Race","Top_quintile", "E(Top_quintile)", "Other_BPD", "E(Other_BPD)")
-print.data.frame(chi.table)
-```
-
 A chi-square test was run on the data that describes the racial breakdown of FIO reports of the 'Top quintile' officers compared with the other 'Other BPD' officers. Note that only those FIO reports that included a racial category were included in this test.
 
 There were a total of eight categories corresponding to the two officer groups and the four racial groups (Black, White, Hispanic, and Other). If there was no significant differences between the actual and the expected values for each  there would be little difference in the racial breakdown of their reports. However, this was not the case, as the chi-square value was too high to accept the null hypothesis that there is no evidence of racial disparities in between the two officer groups with respect to the observed distribution of FIO reports by race.
@@ -836,16 +825,30 @@ race.table[,-1] = apply(race.table[,-1],2,as.numeric)
 # their analysis
         
 # Now for a chi-square test to see if the  observed values differ greatley from expected
-chival.x = c(race.table$Top20,race.table$Other_BPD)
-chival.p = c(race.table$Top20_expected,race.table$Other_BPD_expected)
-chisq.result = chisq.test(chival.x, p=chival.p, rescale.p = TRUE)
-chisq.result
+# Will need a table for the chi-square test and a data frame for printing
+chival = as.table(cbind(race.table$Top20,race.table$Other_BPD))
+chival.df = as.data.frame(cbind(race.table$Top20,race.table$Other_BPD))
+rownames(chival.df)=race.table$Race
+colnames(chival.df)=c("Top_quintile","Other_BPD")
+chisq.result = chisq.test(chival)
+
+
 
 ```
 
-The chi-square test with `r chisq.result[[2]][[1]]` degrees of freedom produced a value of `r format(chisq.result[[1]][[1]],digits=5)`. Given the number of degrees of freedom, the null hypothesis of there being no significant differences in the racial breakdowns of the FIO reports for these two groups of officers would be rejected at the 0.05 level for chi-square values above 14.067, and in this case the value was well above this level.
+#####FIO breakdown by officer group and race#####
+```{r, echo=FALSE}
+print.data.frame(chival.df)
+```
 
-#####Visual depiction of racial disparities#####
+#####Chi-square test results#####
+The chi-square test with `r chisq.result[[2]][[1]]` degrees of freedom produced a value of `r format(chisq.result[[1]][[1]],digits=5)`. Given the number of degrees of freedom, the null hypothesis of there being no significant differences in the racial breakdowns of the FIO reports for these two groups of officers would be rejected at the 0.05 level for chi-square values above 7.815, and in this case the value was well above this level.
+
+```{r, echo=FALSE}
+chisq.result
+```
+
+####Visual depiction of racial disparities####
 Another way to show this disparity in reporting is visually. Below is a grouped bar chart that shows how far above or below expectations each officer group was with respect the the percentage of their FIO reports in each racial group.
 
 ```{r, echo=FALSE}
@@ -865,7 +868,7 @@ race.table$Other_BPD_variance = round(race.table$Other_BPD_variance, digits = 1)
 # points above or below the expected percentage. 
 
 bpd.var = as.matrix(cbind(race.table$Top20_variance,race.table$Other_BPD_variance))
-colnames(bpd.var) = c("Top Quintile", "Other BPD")
+colnames(bpd.var) = c("Top quintile", "Other BPD")
 rownames(bpd.var) = as.character(race.table$Race)
 
 barplot(bpd.var, main="FIO reporting racial variance by BPD group",
