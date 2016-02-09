@@ -451,7 +451,8 @@ palette = colorRampPalette(c('#ffffff','#0000ff'))(64)
 # Table of FIO reports by month of the year and day of the week
 table(fio$Month[fio$Year<2015],fio$Weekday[fio$Year<2015])
 
-# Test to see if distribution by day has equal probability (it does not)
+# Test to see if null hypothesis of distribution by month and weekday 
+# of month and day of the week does not matter is true (it is not)
 chisq.test(table(fio$Month[fio$Year<2015],fio$Weekday[fio$Year<2015]))
 
 # Create a heat map for three situations:
@@ -881,12 +882,17 @@ race.table[,-1] = apply(race.table[,-1],2,as.character)
 race.table[,-1] = apply(race.table[,-1],2,as.numeric)
 # This analysis found 562 with NA (blank) value for race, and BPD included them in
 # their analysis
-        
+
 # Now for a chi-square test to see if the  observed values differ greatley from expected
-chival.x = c(race.table$Top20,race.table$Other_BPD)
-chival.p = c(race.table$Top20_expected,race.table$Other_BPD_expected)
-chisq.result = chisq.test(chival.x, p=chival.p, rescale.p = TRUE)
+# Will need a table for the chi-square test and a data frame for printing       
+chival = as.table(cbind(race.table$Top20,race.table$Other_BPD))
+chival.df = as.data.frame(cbind(race.table$Top20,race.table$Other_BPD))
+rownames(chival.df)=race.table$Race
+colnames(chival.df)=c("Top_quintile","Other_BPD")
+chisq.result = chisq.test(chival)
+print.data.frame(chival.df)
 chisq.result
+
 print("A chi-square test was run on the data that describes the racial breakdown of FIO reports of the top 20% of performers compared with the other 80% of officers. If there was no significant there would be little difference in the racial breakdown of their reports. However, this is apparently not the case, as will be show two ways. First, with a chi-square test and second using a visual comparison.")
         
 paste("Of the ",format(nrow(fio),big.mark = ","), " FIO reports, ", format(sum(is.na(race.code)),big.mark = ","),
@@ -896,7 +902,7 @@ paste("Of the ",format(nrow(fio),big.mark = ","), " FIO reports, ", format(sum(i
         
 paste("The chi-sqare test with ",chisq.result[[2]][[1]], 
       " degreess of freedom produced a value of ", format(chisq.result[[1]][[1]],digits=5),
-      ". Given the number of degrees of freedom, the null hypothesis of there being no significant differece in the racial breakdowns of the FIO reports for these two groups of officers would be rejected at the 0.05 level for chi-square values above 14.067, and in this case the value was well above this level.",
+      ". Given the number of degrees of freedom, the null hypothesis of there being no significant differece in the racial breakdowns of the FIO reports for these two groups of officers would be rejected at the 0.05 level for chi-square values above 7.815, and in this case the value was well above this level.",
       sep="")
         
 paste("The second way to show this disparity in reporting is visually. Below is a grouped bar chart showing the likelihood that an FIO report involved a combinatino of a particular combination of racial group and BPD officer category.")
@@ -929,6 +935,8 @@ abline(h=1,col="darkblue")
 # X% of each racial group. 
 # First, add two columns to the race table to show percentage variance 
 # from expected racial distribution
+
+
 race.table$Top20_variance = 100*((race.table$Top20-race.table$Top20_expected)/race.table$Top20_expected)
 race.table$Top20_variance = round(race.table$Top20_variance, digits = 1)
 race.table$Other_BPD_variance = 100*((race.table$Other_BPD-race.table$Other_BPD_expected)/race.table$Other_BPD_expected)
@@ -938,7 +946,7 @@ race.table$Other_BPD_variance = round(race.table$Other_BPD_variance, digits = 1)
 # points above or below the expected percentage. 
 
 bpd.var = as.matrix(cbind(race.table$Top20_variance,race.table$Other_BPD_variance))
-colnames(bpd.var) = c("Top Quintile", "Other BPD")
+colnames(bpd.var) = c("Top quintile", "Other BPD")
 rownames(bpd.var) = races
 
 barplot(bpd.var, main="FIO reporting racial variance by BPD group",
