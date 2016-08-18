@@ -469,7 +469,7 @@ A review Boston Police Department (BPD) Field Interrogation and Observation (FIO
 * BPD assigned a racial identifier to `r format(100*sum(!is.na(fio$Race_code))/nrow(fio), digits=4)`% of all FIO reports, and of that `r format(100*sum(!is.na(fio$Race_code))/nrow(fio), digits=4)`%:
     * `r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=3)`% were Black, 
     * `r format(100*length(which(fio$Race_code =="White"))/sum(!is.na(fio$Race_code)), digits=3)`% were White, 
-    * `r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=3)`% were Hispanic, and 
+    * `r format(100*length(which(fio$Race_code =="Hispanic"))/sum(!is.na(fio$Race_code)), digits=3)`% were Hispanic, and 
     * `r format(100*length(which(fio$Race_code =="Other"))/sum(!is.na(fio$Race_code)), digits=2)`% were of other races.
 
 * Among the `r format(nrow(supercops), big.mark=",")` BPD officers who submitted at least one FIO report, the 20% of the officers who accounted for the most FIO reports were responsible for `r format(100*mean(fio.top20), digits=4)`% of all reports.
@@ -761,7 +761,7 @@ Due to the limitations of the data, and the focus on looking for racial disparit
 * FIO reports with a racial identifier - `r format(sum(!is.na(race.code)),big.mark = ",")` (`r format(100*sum(!is.na(fio$Race_code))/nrow(fio), digits=4)`%)
     * Black - `r format(sum(fio$Race_code=="Black",na.rm = TRUE),big.mark = ",")` (`r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=3)`%)
     * White - `r format(sum(fio$Race_code=="White",na.rm = TRUE),big.mark = ",")` (`r format(100*length(which(fio$Race_code =="White"))/sum(!is.na(fio$Race_code)), digits=3)`%)
-    * Hispanic - `r format(sum(fio$Race_code=="Hispanic",na.rm = TRUE),big.mark = ",")` (`r format(100*length(which(fio$Race_code =="Black"))/sum(!is.na(fio$Race_code)), digits=3)`%)
+    * Hispanic - `r format(sum(fio$Race_code=="Hispanic",na.rm = TRUE),big.mark = ",")` (`r format(100*length(which(fio$Race_code =="Hispanic"))/sum(!is.na(fio$Race_code)), digits=3)`%)
     * Other - `r format(sum(fio$Race_code=="Other",na.rm = TRUE),big.mark = ",")` (`r format(100*length(which(fio$Race_code =="Other"))/sum(!is.na(fio$Race_code)), digits=2)`%)
 
 ####Summary of BPD officer performance####
