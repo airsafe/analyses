@@ -1,9 +1,10 @@
 # Cleaning and summarizing data from the NTSB Incident database
-# Created by Todd Curtis of AirSafe.com (tcurtis@airasfe.com), December 2015
+# Created by Todd Curtis of AirSafe.com (tcurtis@airasfe.com), 28 August 2016 version
 #
-# The online accessible NTSB aviation accident database contains information from 1982 and later about 
-# civil aviation accidents and selected incidents within the United States, its 
-# territories and possessions, and in international waters.
+# The online accessible NTSB aviation accident database contains accident and incident information, 
+# the vast majority of which are from, 1982 onwards,
+# and focuses on any event within the United States, its 
+# territories and possessions, and any US-registered aircraft anywhere in the world.
 # 
 # The database can be accessed at http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx,
 # and the results can be downloaded into either an XML file callled AviationData.xml
@@ -14,15 +15,18 @@
 # also have the R code that you will use to analyze the data.
 #
 # The online NTSB database allows users to download the output either as a 
-# text file or an XML file. The following program takes the XML  version of 
+# text file or an XML file. The following program takes the text file version of 
 # the output, processes the data to make it suitable for analysis by R, and
-# creates a CSV file that can be analyzed by a wide rage of data analysis programs.
+# creates both a CSV file that can be analyzed by a wide rage of data analysis programs,
+# and a text file that is in a format consistent with the text file output provided by the NTSB.
+# Specifically, in each record, the data fields are separated by three characters - a vertical bar with at space on either side.
 
 # In addition to converting the input file, it provides sevaral example summary 
 # statistics concerning the distribution of accidents by geographical area,
 # time, and severity of outcomes.
 
-# Step 0: Step 0:  Load the NTSB output file
+# Step 0:  Load the NTSB output file:
+
 
 require(XML)
 if (!require("XML")){ 
@@ -33,8 +37,9 @@ library(XML)
 data <- xmlParse("AviationData.xml")
 
 # The XML file is converted to a list format where each row contains both 
-# the name of the variable and the value fl that variable
+# the name of the variable and the value of that variable
 ntsb.data <- xmlToList(data)
+
 
 # Converts to data frame but transposes values, reverse the transposal and remove 
 # unneeded row names
@@ -42,31 +47,34 @@ ntsb.data = as.data.frame(ntsb.data)
 ntsb.data = as.data.frame(t(ntsb.data))
 rownames(ntsb.data) = NULL
 
-nstb.data.raw = ntsb.data # Raw data on standby in case of a later problem
+ntsb.data.raw = ntsb.data # Raw data on standby in case of a later problem
+
 
 # DATA CLEANING
 
-# Step 1: Ensure that the column (variable) names and data types fit the standard set 
-# by the process used to convert the text file data into a CSV file
- 
-colnames(ntsb.data) = c("Event.Id", "Investigation.Type", "Accident.Number",
-        "Event.Date", "Location",  "Country", "Latitude", "Longitude",
-        "Airport.Code", "Airport.Name","Injury.Severity", "Aircraft.Damage",
-        "Aircraft.Category", "Registration.Number", "Make", "Model",
-        "Amateur.Built","Number.of.Engines", "Engine.Type", "FAR.Description",
-        "Schedule","Purpose.of.Flight", "Air.Carrier", "Total.Fatal.Injuries",
-        "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Uninjured",
-        "Weather.Condition", "Broad.Phase.of.Flight", "Report.Status",
-        "Publication.Date")
+# Step 1: Eliminate any columns (variables) added as a consequence of Step 0,
+# columns which have no data (all are NA) 
+elim.var = which(apply(ntsb.data, 2, function(x) all(is.na(x))))
+elim.var = as.data.frame(elim.var) # Column name and column number of this data frame are the columns to be cut
 
-# Step 2: Ensure character variables are of type character. 
-char.vecs = c("Event.Id","Investigation.Type","Accident.Number",       
-              "Location", "Country", "Airport.Code", "Airport.Name", "Injury.Severity",
-              "Aircraft.Damage", "Aircraft.Category", "Registration.Number", "Make",
-              "Model", "Amateur.Built", "Engine.Type", "FAR.Description","Schedule",              
-              "Purpose.of.Flight", "Air.Carrier", "Weather.Condition",
-              "Broad.Phase.of.Flight", "Report.Status")
-char.vecs.ndx = which(colnames(ntsb.data) %in% char.vecs)
+# Eliminates all columns with only NA values
+if (nrow(elim.var)>0) ntsb.data = ntsb.data[,-elim.var[,1]] 
+
+# *Update: Step 1A (XML only): Ensure that the column (variable) names and data types fit the standard set 
+# by the process used to convert the text file data into a CSV file
+
+colnames(ntsb.data) = c("Event.Id", "Investigation.Type", "Accident.Number",
+                        "Event.Date", "Location",  "Country", "Latitude", "Longitude",
+                        "Airport.Code", "Airport.Name","Injury.Severity", "Aircraft.Damage",
+                        "Aircraft.Category", "Registration.Number", "Make", "Model",
+                        "Amateur.Built","Number.of.Engines", "Engine.Type", "FAR.Description",
+                        "Schedule","Purpose.of.Flight", "Air.Carrier", "Total.Fatal.Injuries",
+                        "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Uninjured",
+                        "Weather.Condition", "Broad.Phase.of.Flight", "Report.Status",
+                        "Publication.Date")
+
+
+# Step 2: Ensure character variables are of type character
 
 # As part of the process, need to ensure that there are not extra spaces
 # at the beginning or end of each character value
@@ -87,11 +95,21 @@ stripper <- function(x){
 }
 # ================================
 
+# Find which columns match the following known character vectors
+char.vecs = c("Event.Id","Investigation.Type","Accident.Number",       
+              "Location", "Country", "Airport.Code", "Airport.Name", "Injury.Severity",
+              "Aircraft.Damage", "Aircraft.Category", "Registration.Number", "Make",
+              "Model", "Amateur.Built", "Engine.Type", "FAR.Description","Schedule",              
+              "Purpose.of.Flight", "Air.Carrier", "Weather.Condition",
+              "Broad.Phase.of.Flight", "Report.Status")
+
+char.vecs.ndx = which(colnames(ntsb.data) %in% char.vecs)
+
 # Ensure that the character variable is of type character, then remove extra spaces
 for (i in 1:length(char.vecs.ndx)) {
         ntsb.data[,char.vecs.ndx[i]] = as.character(ntsb.data[,char.vecs.ndx[i]])
         ntsb.data[,char.vecs.ndx[i]] = stripper(ntsb.data[,char.vecs.ndx[i]])
-        }
+}
 
 # Step 3: Ensure numerical variables are of type numeric
 
@@ -100,16 +118,16 @@ num.vecs = c("Latitude", "Longitude", "Number.of.Engines", "Total.Fatal.Injuries
              "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Uninjured")
 
 # Creates a vector for the column numbers for numeric variables
-num.vecs.ndx = which(colnames(ntsb.data) %in% num.vecs)
+num.vecs.ndx = which((colnames(ntsb.data)) %in% num.vecs)
 
 # Note: This step appears to replace missing numeric values with NA
-for (i in 1:length(num.vecs.ndx)){
-             ntsb.data[,num.vecs.ndx[i]] = as.numeric(as.character(ntsb.data[,num.vecs.ndx[i]]))
+for (i in 1:length(num.vecs.ndx)) {
+       ntsb.data[,num.vecs.ndx[i]] = as.numeric(as.character(ntsb.data[,num.vecs.ndx[i]]))
 }
 
 # Step 4: Change date variables into a format suitable for R
 
-# Dates are in form 01/31/2006, must convert to a date format of yyyy-mm-dd
+# Dates are in form mm/dd/YYYY, must convert to a date format of YYYY-mm-dd
 # Two date variables, Event.Date and Pulication Date
 ntsb.data$Event.Date = as.Date(ntsb.data$Event.Date, "%m/%d/%Y")
 ntsb.data$Publication.Date = as.Date(ntsb.data$Publication.Date, "%m/%d/%Y")
@@ -127,7 +145,6 @@ ntsb.data$Weekday = weekdays(ntsb.data$Event.Date, abbreviate = TRUE)
 ntsb.data$Month = factor(ntsb.data$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
                                                   "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
 
-
 ntsb.data$Weekday = factor(ntsb.data$Weekday,levels=c("Sun","Mon","Tue",
                                                       "Wed","Thu","Fri","Sat"), ordered=TRUE)
 
@@ -135,17 +152,27 @@ ntsb.data$Weekday = factor(ntsb.data$Weekday,levels=c("Sun","Mon","Tue",
 elim.row = which(is.na(ntsb.data$Event.Date))
 if (length(elim.row)>0) ntsb.data = ntsb.data[-elim.row,] # Eliminates all rows with only NA value for Event.Date
 
-# Step 6: Changing blank, "N/A","Unknown", and similar responses to NA
+# Step 6: Change blank, "N/A","Unknown", and similar responses to NA
 
+# Must first put airport names and make in title case, first by using tolower() followed by toTitleCase()
+# This has to be done before any effort to replace words like "UNK", and "NA" with NA
+# Will install {tools} package for title case function
+
+# The first step is to install new packages that will be needed for the analysis.
+# In this case, the function needed is toTitleCase(text)
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+if("tools" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("tools")}
+library(tools)
+
+ntsb.data$Airport.Name = toTitleCase(tolower(ntsb.data$Airport.Name))
+ntsb.data$Air.Carrier = toTitleCase(tolower(ntsb.data$Air.Carrier))
+ntsb.data$Make = toTitleCase(tolower(ntsb.data$Make))
+# NOTE: Not a perfect solution, does not take into account names like McFarland, will end up as Mcfarland
+#       Also, for some reason, umlats that were in a word in an XML file don't respond to the toTitleCase commmand
 # First, define  a vector of words or phrases that are to be replaced with NA
-repl.words = c("", ".", "N/A", "UNK","Unknown","Unavailable")
-
-# Then for varable (column) in the NTSB database, check each character column
-# for the presence of replacement words. Each list element will have 
-# information on each column, including the the position (row)
-# of each replacement word (if any).
-
-# Note that the following checks all columns, event non-character one, but in the end,
+repl.words = c("", ".", "N/A", "n/a", "N/a","NA","na","Na", "none", "None", "UNK","Unknown","Unavailable", "UNKNOWN", "unknown", "Unk", "unk")
+# Note that the following checks all columns, even non-character one, but in the end,
 # only character columns will have any non-zero values for replacement words
 repl.list = apply(ntsb.data,2, function(x) which(x %in% repl.words))
 
@@ -169,14 +196,19 @@ for(i in 1:length(with.missing.ndx)){
 
 
 # Step 7: Specify city name, state abbreviation, and full state name
-# for any location in the United states
+# for any location in the United states. 
 
-# Will focus only on rows with a US city address entered, implying the following is true
-# ntsb.data$Location is not NA and ntsb.data$Country=="United States"
-city.locs = !(is.na(ntsb.data$Location)) & ntsb.data$Country=="United States"
+# This step will eliminate rows that have NA as the location AND NA as the country
+# Will not add city or state if not one of the identifiable US abbreviations
 
-# The following are the locations in the vector where this is true
-city.locs.ndx = which(city.locs) 
+# First, get the index of records with non-NA locations
+#       which(!is.na(ntsb.data$Location))
+# Second, get the index of records with non-NA countries 
+#       which(!is.na(ntsb.data$Country))
+# Now get a vector that is the union of these two indices
+# where there is either a country or a location that is not NA
+city.locs.ndx = union(which(!is.na(ntsb.data$Location)), which(!is.na(ntsb.data$Country)) )
+ntsb.data = ntsb.data[city.locs.ndx,]
 
 # STATE CODES: Before adding full state names to data frame, must match
 # two-letter state codes with full state names.
@@ -208,6 +240,8 @@ comma.pos = rep(NA,nrow(ntsb.data)) # start with NA for number of commas for all
 city.vec = rep(NA,nrow(ntsb.data))
 state.vec = rep(NA,nrow(ntsb.data))
 
+
+
 for(x in 1:length(city.locs.ndx)){
         # Create a list that contains vector of comma positions
         comma.pos.list = gregexpr(",", ntsb.data$Location[city.locs.ndx[x]], fixed=TRUE)
@@ -216,14 +250,14 @@ for(x in 1:length(city.locs.ndx)){
         
         # Get the length of the Location field character string
         num.chars = nchar(ntsb.data$Location[city.locs.ndx[x]]) 
-        
+
         # Determine state code if location has enough characters for comma, space, and code
         if(comma.pos[x] >= 1 & num.chars >= 4){
                 # Use last comma position to determine where split character string and find state code
                 city.vec[city.locs.ndx[x]] =  substr(ntsb.data$Location[city.locs.ndx[x]], 1,(comma.pos[x]-1)) 
                 state.vec[city.locs.ndx[x]] =  substr(ntsb.data$Location[city.locs.ndx[x]], (comma.pos[x]+2),num.chars)       
         } # End of if statement for creating city name and state abbreviation
-        
+
 } # End of process for finding US city names and state abbreviations     
 
 
@@ -235,7 +269,7 @@ for (i in 1:length(city.locs.ndx)){
         if(state.vec[i] %in% usps.abb) {
                 state.full[i]=usps.state[grep(state.vec[i], usps.abb)]
         }
-        # Erase city and two-letter state code if state code is not to USPS standards
+        # Erase city and two-letter state code if state code is not in usps.abb list
         if(!(state.vec[i] %in% usps.abb)) {
                 city.vec[i]=NA
                 state.vec[i]=NA
@@ -244,10 +278,53 @@ for (i in 1:length(city.locs.ndx)){
 
 # Can now add city and state abbrevications, and full state names to data frame
 ntsb.data$City=city.vec
+ntsb.data$City = toTitleCase(tolower(ntsb.data$City)) # Ensure city names are in title case
 ntsb.data$State.code=state.vec
 ntsb.data$State=state.full
 
-# Step 8: Arrange the new columns in logical groupings
+
+# Step 8: Add a new variable that has the maximum injury outcome (Fatal, Injury, or None) for
+#       every record with at least one non-NA value for the number of fatalities,
+#       injuries (serious, minor, or none). Total number of fatalities already given by 
+#       variable Total.Fatal.Injuries, so just need the non-NA  values greater than zero for fatal Max.Injury value
+
+# First, the Max.Injury fatals
+ntsb.data$Max.Injury = rep(NA,nrow(ntsb.data)) # start with NA for maximum injury
+fatal.ndx = which(ntsb.data$Total.Fatal.Injuries > 0)
+ntsb.data$Max.Injury[fatal.ndx] = "Fatal"
+
+# Second, the Max.Injury injuries. For Max.Injury to be equal to Injury, there must be at 
+#       least one minor or serious injury, and no fatalities
+#       Get the index of fatals and the index of injuries,
+#       find the intersection, then take away the intersection from the
+#       index of injuries.
+
+injury.ndx = which(ntsb.data$Total.Serious.Injuries > 0 | ntsb.data$Total.Minor.Injuries>0)
+injury.only.ndx = setdiff(injury.ndx,intersect(injury.ndx,fatal.ndx)) # Injuries, but not fatalitiesf
+ntsb.data$Max.Injury[injury.only.ndx] = "Injury"
+
+# Lastly, the no injury events, which would be the no injury events, 
+#       excluding the Max.Injury injury events previously marked as "Fatal" or "Injury"
+no.injury.ndx = which(ntsb.data$Total.Uninjured > 0)
+no.injury.ndx = setdiff(no.injury.ndx,union(fatal.ndx,injury.only.ndx))
+ntsb.data$Max.Injury[no.injury.ndx] = "None"
+
+# Also adding a variable for total total injuries, and total number of people involved 
+#       for records with non-NA data
+
+ntsb.data$Total.Injured = rep(NA,nrow(ntsb.data))
+ntsb.data$Total.Injured[injury.ndx] = apply(ntsb.data[injury.ndx, c("Total.Serious.Injuries","Total.Minor.Injuries")],1,sum,na.rm=TRUE)
+
+# For total number of people involved, need index of every row with at least one non-zero value for
+#       fatals, minor injuries, serious injuries, or no injuries
+occupied.ndx = unique(sort(c(fatal.ndx,injury.ndx,no.injury.ndx))) # non-duplicated
+
+ntsb.data$Total.Involved = rep(NA,nrow(ntsb.data))
+ntsb.data$Total.Involved[occupied.ndx] = apply(ntsb.data[occupied.ndx, c("Total.Fatal.Injuries","Total.Serious.Injuries","Total.Minor.Injuries","Total.Uninjured")],1,sum,na.rm=TRUE)
+
+
+
+# Step 9: Arrange the new columns in logical groupings
 
 new.cols = c("Event.Id", "Investigation.Type", "Accident.Number",
              "Event.Date", "Year", "Month", "Day", "Weekday",
@@ -257,18 +334,34 @@ new.cols = c("Event.Id", "Investigation.Type", "Accident.Number",
              "Registration.Number", "Make", "Model", "Amateur.Built",
              "Number.of.Engines", "Engine.Type", "FAR.Description", "Schedule",
              "Purpose.of.Flight", "Air.Carrier", "Total.Fatal.Injuries",
-             "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Uninjured",
+             "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Injured", "Total.Uninjured", "Total.Involved",
+             "Max.Injury",
              "Weather.Condition", "Broad.Phase.of.Flight", "Report.Status",
              "Publication.Date")
 
 ntsb.data = ntsb.data[,new.cols]
 
-# Step 9 (Final step): Save the processed data frame as a CSV file
-write.csv(ntsb.data, file = "ntsb_data.csv")
+# Step 10 (Final step): Save the processed data frame as a CSV and Text file
+
+# First output file is a CSV file direct from the data frame using default options for write.csv function
+write.csv(ntsb.data, file = "ntsb_data.csv", row.names = FALSE)
+
+# Second output file replaces all NA values with a null-type character before export, 
+#       removes any row numbers, and adds a seperator consisting of a vertical bar with a space on each side.
+
+# This makes the output consistent with the NTSB text file output format, and
+#       also makes it easier to do a side-by-side comparison with NTSB output using data visualization
+#       software like Tableau or data cleaning software like OpenRefine
+ntsb.data.text = ntsb.data
+ntsb.data.text = sapply(ntsb.data.text, as.character)
+ntsb.data.text[is.na(ntsb.data.text)] = "" 
+ntsb.data.text = as.data.frame(ntsb.data.text)
+write.table(ntsb.data.text, file = "ntsb_data.txt", sep = " | ", quote = FALSE, row.names = FALSE)
 
 # SUMMARY STATISTICS
+# Note: All statistics are no earlier than 2005
 
-print("Summary statistics based on complete download of data made 12 December 2015")
+print("Summary statistics based on complete download of data made early August 2016")
 
 paste("Total number of records - ", format(nrow(ntsb.data.raw), big.mark=","), sep="") 
 
@@ -276,6 +369,9 @@ paste("Number of records excluded - ", nrow(ntsb.data.raw)-nrow(ntsb.data))
 
 paste("Number of records processed - ", format(nrow(ntsb.data), big.mark=","), sep="") 
 
+paste("Number of events with an indentifiable number of occupants - ", format(length(occupied.ndx), big.mark=","), sep="") 
+
+paste("Number of events with either fatalities or injuries - ", format(length(union(fatal.ndx,injury.only.ndx)), big.mark=","), sep="") 
 
 paste("Number of records with a US location - ", format(nrow(ntsb.data[which(ntsb.data$Country=="United States"),]), big.mark=","),".", sep="")
 
@@ -283,90 +379,90 @@ paste("Total number of records involving fatalities - ", format(sum(ntsb.data$To
 
 paste("Total fatalities - ", format(sum(ntsb.data$Total.Fatal.Injuries, na.rm=TRUE), big.mark=","),".", sep="") 
 
-print("Table of reports by state: 1982-2015")
-table(ntsb.data[which(ntsb.data$Year>=1982),]$State.code)
+print("Table of reports by state")
+table(ntsb.data[which(ntsb.data$Year>=2005),]$State.code)
 
-print("Table of top 15 states by number of events: 1982-2015")
-sort(table(ntsb.data[ntsb.data$Year>=1982,]$State.code), decreasing = TRUE)[1:15]
+print("Table of top 15 states by number of events")
+sort(table(ntsb.data[ntsb.data$Year>=2005,]$State.code), decreasing = TRUE)[1:15]
 
 
-# Vector of fatal events from 1982 onwards
-fatal.vec = which(ntsb.data$Total.Fatal.Injuries>=1 & ntsb.data$Year>=1982)
+# Vector of fatal events
+fatal.vec = which(ntsb.data$Total.Fatal.Injuries>=1 & ntsb.data$Year>=2005)
 
-# Data frame of all fatals from 1982 and beyond
+# Data frame of all fatals from 2005 and beyond
 fatal.df = ntsb.data[fatal.vec,]
 
-# Histogram of top 15 states by number of events: 1982-2015
-barplot(sort(table(ntsb.data[ntsb.data$Year>=1982,]$State.code),
+# Histogram of top 15 states by number of events
+barplot(sort(table(ntsb.data[ntsb.data$Year>=2005,]$State.code),
              decreasing = TRUE)[1:15], col="dodgerblue",xlab="State", ylab="Events", 
-        cex.names = 0.7, main="Top 15 states by number of events 1982-2015")
+        cex.names = 0.7, main="Top 15 states by number of events")
 
 
-print("Table of top 15 states by number of fatal events: 1982-2015")
-# Vector of all fatals for events with US state code from 1982 and beyond
+print("Table of top 15 states by number of fatal events")
+# Vector of all fatals for events with a US state code
 sort(table(ntsb.data[fatal.vec,]$State.code), decreasing = TRUE)[1:15]
 
 # Top 15 states by total fatalities
-print("Table of top 15 states by number of fatalities: 1982-2015")
+print("Table of top 15 states by number of fatalities")
 sort(as.table(tapply(fatal.df$Total.Fatal.Injuries, fatal.df$State.code, sum)), decreasing = TRUE)[1:15]
 
-# Histogram of top 15 states by number of fatal events 1982-2015
+# Histogram of top 15 states by number of fatal events 
 barplot(sort(table(ntsb.data[fatal.vec,]$State.code), decreasing = TRUE)[1:15],
         col="dodgerblue",xlab="State", ylab="Fatal events",
-        cex.names = 0.7, main="Top 15 states by number of fatal events: 1982-2015")
+        cex.names = 0.7, main="Top 15 states by number of fatal events")
 
 
 # Table of events by day of the week 
-print("Events by day of the week: 1982-2015")
-table(ntsb.data[ntsb.data$Year>=1982,]$Weekday)
+print("Events by day of the week")
+table(ntsb.data[ntsb.data$Year>=2005,]$Weekday)
 
 # Histogram events by day of the week
-barplot(table(ntsb.data[ntsb.data$Year>=1982,]$Weekday), col="dodgerblue",
-        xlab="Day", ylab="Events", main="Events by day of week: 1982 - 2015")
+barplot(table(ntsb.data[ntsb.data$Year>=2005,]$Weekday), col="dodgerblue",
+     xlab="Day", ylab="Events", main="Events by day of week")
 
 # Table of fatal events by day of the week 
-print("Fatal events by day of the week 1982-2015")
+print("Fatal events by day of the week")
 table(fatal.df$Weekday)
 
 # Histogram of fatal events by day of the week
 barplot(table(fatal.df$Weekday), col="dodgerblue", cex.names = 1.2,
-        xlab="Day", ylab="Events", main="Fatal events by day of week: 1982 - 2015")
+        xlab="Day", ylab="Events", main="Fatal events by day of week")
 
 # Table of events by month of the year
-print("Events by month of the year 1982-2015")
-table(ntsb.data[ntsb.data$Year>=1982,]$Month)
+print("Events by month of the year")
+table(ntsb.data[ntsb.data$Year>=2005,]$Month)
 
 # Histogram of events by month of the year
-barplot(table(ntsb.data[which(ntsb.data$Year>=1982),]$Month), col="dodgerblue", cex.names = 0.8,
-        xlab="Month", ylab="Events", main="Events by month: 1982-2015")
+barplot(table(ntsb.data[which(ntsb.data$Year>=2005),]$Month), col="dodgerblue", cex.names = 0.8,
+        xlab="Month", ylab="Events", main="Events by month")
 
 # Table of fatal events by month of the year
-print("Events by month of the year 1982-2015")
+print("Fatal events by month of the year")
 table(fatal.df$Month)
 
 # Histogram of fatal events by month of the year
 barplot(table(fatal.df$Month), col="dodgerblue", cex.names = 0.8,
-        xlab="Day", ylab="Fatal events", main="Fatal events by month: 1982-2015")
+        xlab="Day", ylab="Fatal events", main="Fatal events by month")
 
 
 
-# Plot of events by year 1982-2015
-barplot(table(ntsb.data[ntsb.data$Year>=1982,]$Year), col="dodgerblue",
-        xlab="Year", ylab="Events", main="Events by year: 1982 - 2015")
+# Plot of events by year
+barplot(table(ntsb.data[ntsb.data$Year>=2005,]$Year), col="dodgerblue",
+     xlab="Year", ylab="Events", main="Events by year")
 
 
-# Histogram of fatal events by year 1982 - 2015
+# Histogram of fatal events by year
 barplot(table(ntsb.data[fatal.vec,]$Year), col="dodgerblue",
-        xlab="Year", ylab="Fatal events", main="Fatal events by year: 1982 - 2015")
+     xlab="Year", ylab="Fatal events", main="Fatal events by year")
 
 # -------
-# Fatalites by year 1982 - 2015
+# Fatalites by year
 
 # Do a tapply for sums by category then ensure it is table
 death.table = as.table(tapply(fatal.df$Total.Fatal.Injuries, fatal.df$Year, sum))
 
 barplot(death.table, col="dodgerblue",
-        xlab="Year", ylab="Fatalities", main="Fatalities by year: 1982 - 2015")
+     xlab="Year", ylab="Fatalities", main="Fatalities by year")
 # -------
 
 # Total fatalities by US state and territory
