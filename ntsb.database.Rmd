@@ -1,7 +1,7 @@
 ---
 title: "Converting NTSB database downloads"
 author: "Todd Curtis"
-date: "December 12, 2015"
+date: "September 5, 2016"
 output: html_document
 ---
 
@@ -10,21 +10,23 @@ The National Transportation Safety Board (NTSB) maintains a database of aviation
 
 While the database is publicly accessible on the NTSB web site, users are limited in how the information can be used. The records can be displayed on the web site, or the results of a search may be downloaded. However, because the downloads are in the form of a text or XML file, rather than a file type that can be used by common spreadsheet or database programs, users must first transform the data into a form that can be analyzed, but no resources are provided by the NTSB for that purpose.
 
-While many spreadsheet programs, including Excel and LibreOffice, may be able to covert a text or an XML file into a common format such as a CSV file (particularly the NTSB text file format, which uses the vertical bar (|) as delimiter), the data may still have to be transformed in other ways in order to be analyzed by R or other data analysis programs.
+While many spreadsheet programs, including Excel and LibreOffice, may be able to covert a text or an XML file into common formats such as a text CSV file, the data may still have to be transformed in other ways in order to be analyzed by R or other data analysis programs.
 
-Using the data analysis program R, AirSafe.com has created two programs that can take either the text file or XML file version of the output and turn it into a CSV file that can be used by widely available spreadsheet and data analysis programs. AirSafe.com has made the following resources available to the public, the R programs that perform either a text to CSV or XML to CSV file transformation, and a CSV file representing the download of the entire database of over 77,000 records from 1982 to 2015.
+Using the data analysis program R, AirSafe.com has created two programs that can take either the text file or XML file version of the output and turn it into a CSV file and a text file that can be used by widely available spreadsheet and data analysis programs. The text file output would used the NTSB text file format, which uses vertical bar (|), with a space on either side of the vertical bar, as the delimiter between the varible fields on each accident and incident record.
+
+AirSafe.com has made the following resources available to the public, the R programs that will create both a text and CSV file based on either the text file or XML file output from the online NTSB database, and both the text and CSV files representing the download of the entire database of just under 79,000 records (downloaded 4 September 2016).
 
 ###Background###
-The National Transportation Safety Board is an independent US government agency that has as one of its missions the investigation of accidents involving air transportation. As part of its mission, it provides a wide range of aviation safety information to the general public, including access to a database of aircraft accidents and incidents. The database, which contain records from 1982 to the present, can be accessed at [http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx](http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx). Each record has a variety of data about each incident and accident, including the date and location of the event, and the number and type of injuries. 
+The National Transportation Safety Board is an independent US government agency that has as one of its missions the investigation of accidents involving air transportation. As part of its mission, it provides a wide range of aviation safety information to the general public, including access to a database of aircraft accidents and incidents. The database records, the vast majority of which contain records from 1948 to the present, can be accessed at [http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx](http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx). Each record has a range of data about each incident and accident, including the date and location of the event, and the number and type of injuries. 
 
-Users can choose to search for specific event characteristics, and can have the results either displayed in their browser or downloaded into either an XML file called AviationData.xml or a text file called AviationData.txt. Users also have the option of downloading the entire database of over 77,000 records.
+Users can choose to search for specific event characteristics, and can have the results either displayed in their browser or downloaded into either an XML file or a text. Users also have the option of downloading the entire database.
 
 While the NTSB provides various data summaries elsewhere on the site and in reports released to the public, the organization does not provide either any resources for users to create their own summaries using resources on the site, nor does it provide any instructions on how to transform the data into a form that could be used by a spreadsheet program or other data analysis program. 
 
 ###Objective###
 AirSafe.com, which since 1996 has provided the public with extensive information and resources related to airline safety and security, sought to create a process that could both transform the NTSB database output into a form that could be analzyed by AirSafe.com, and to provide other researchers with the resources that could allow them to conduct their own analyses. Those resources include the following:
 
-* Two programs, each written in the statistical computing language R, that would allow a user to transform an XML or text file output from the NTSB online database into into a data format that could be analyzed by R, or into a CSV file that could be used by other statistical computing programs or even spreadsheet programs such as Excel or Google Sheets.
+* Two programs, each written in the statistical computing language R, that would allow a user to transform an XML or text file output from the NTSB online database into a data format that could be analyzed by R, or exported into either a CSV file or text file that could be analyzed by other data analysis programs such as Excel, Google Sheets, and OpenRefine; or business intelligence and analytics programs such as Tableau.
 
 * A data dictionary that describes each of the variables created by the AirSafe.com program.
 
@@ -50,18 +52,16 @@ There are several kinds of groups or individuals who may find some or all of the
 ###How to get the most out of this report###
 There are three ways that the information associated with this report will likely be used:
 
-1. The CSV data and the data dictionary associated with this report may be taken and used to perform analyses with a program other than R. To do this, the reader can simply go to the end of this report to find links to the CSV data (representing the entire contents of the NTSB database, encompassing the period from January 1982 to early December 2015).
+1. The CSV data and the data dictionary associated with this report may be taken and used to perform analyses with a program other than R. To do this, the reader can simply go to the end of this report to find links to the CSV and text file data representing every event in the NTSB database for all dates on or before 31 August 2016 (download date was XXX 2016).
 
-2. The R programs developed for this report may be used to transform the NTSB database outputs for further analysis in R. Links to both programs are in the Resources section at the end of this report. If the user will only need to analyze NTSB data from earlier than the first week of December 2015, the CSV file in the Resources section already has all of that information.
+2. The R programs developed for this report may be used to transform the NTSB database outputs for further analysis in R. Links to both programs are in the Resources section at the end of this report. If the user will only need to analyze NTSB data from earlier than 1 September 2016, the CSV and text files in the Resources section already have all of that information.
 
-3. The R programs associated with this report may be used as a template or stepping stone for a revised R program, or to develop similar programs for another data analysis programming environment. Links to a pair of programs, one to transform the XML NTSB data output and one to transform the text file output, are in the resources section. Both programs also contain sample summary analyses and data graphics to help illustrate what can be done with the processed data.
+3. The R programs associated with this report may be used as a template or stepping stone for a revised R program, or to develop similar programs for another data analysis programming environment. Links to a pair of programs, one to transform the XML NTSB data output and one to transform the text file output, are in the resources section. Both programs also contain sample summary analyses and data graphics from the records dated from January 2005 onwards to help illustrate what can be done with the processed data.
 
 All three kinds of users would find the data dictionary useful, as it provides detailed descriptions of the variables used in the NTSB database, as well as the variables that were added by AirSafe.com to make it easier to create useful summary statistics from the NTSB data.
 
-While the first and second types of users can proceed to Summary Statistics and Resources section at the end of this document, the third type of user who intends to alter the R programs in the Resources section or who wish to create a similar program in another programming language should review the rest of this document.
-
 ###Transformation programs###
-Both the R program to transform a text NTSB output file and the one to transform an XML NTSB output file went through 10 general transformation steps (Step 0 to Step 9) to create a downloadable CSV file. Eight of these steps (Step 2 to Step 9) were the same in both programs, and the differences in the first two steps (Step 0 and Step 1) will be noted below. 
+Both the R program to transform a text NTSB output file and the one to transform an XML NTSB output file went through 10 general transformation steps (Step 0 to Step 10) to create downloadable CSV and text files. Seven of these steps were the same in both programs, and the differences in the other three steps (Step 0, Step 1, and Step 6) will be noted below. 
 
 ####Transformation procedures####
 The transformation process assumes three things:
@@ -71,14 +71,12 @@ The transformation process assumes three things:
 3. That the user has downloaded into the same working directory either the text file or XML file associated with a search on the NTSB online database.
 
 #####Step 0: Load the NTSB output file #####
-The text conversion program uploads the file "AviationData.txt" from the same working directory of the R program. Note that when downloading the output from the NTSB web site, it may save the file under a different name and in a location other than your working directory.
+The text conversion program uploads the file "AviationData.txt" from the same working directory of the R program. The XML conversion program uploads the file "AviationData.xml" from the working directory. Note that when downloading from the NTSB web site, the download will go to your default download directory or to a directory that you designate. Also, if you download something less than the complete database, it may save the file under a name other than "AviationData.xml" or "AviationData.txt" into your directory.
 
-The XML conversion program assumes the file has the name "AviationData.xml"
-
-The text file conversion program would removes the field separator character and transforms the variable names into ones appropriate for a data frame (replacing any spaces in the variable name with a period). For example, the variable name "Investigation Type" becomes "Investigation.Type". 
+The text file conversion program would removes the field separator character (a vertical bar) and transforms the variable names into ones appropriate for a data frame (replacing any spaces in the variable name with a period). For example, the variable name "Investigation Type" becomes "Investigation.Type". 
 
 ##### Step 1: Eliminate extra columns (text) or specify variable names (XML)#####
-The text file conversion process adds a column with is devoid of data in the data frame, and in the text file program this column is removed. 
+The text file conversion process adds a column that is devoid of data in the data frame, and in the text file program this column is removed. 
 
 The XML conversion program does not add any extra columns. Instead, Step 1 in this program ensures that the variable names used are the same as the type used in the text conversion program.
 
@@ -91,13 +89,15 @@ Variables identified from the NTSB data dictionary as being of type numeric are 
 #####Step 4: Change date variables into a format suitable for R#####
 The NTSB database has two date variables, one for the date of the event and a second for the date of the publication of the accident or incident report. Dates are in the date format dd/mm/YYYY, and are converted to the date format YYYY-mm-dd. 
 
-This step also takes the date of the event and adds three more variables: the year of the event, the month the event occurred, and the day of the week of the event's occurrence.
+This step also takes the date of the event and adds three more variables: the year of the event, the month the event occurred, and the day of the week of the event's occurrence. There is no transformation of the date of publication variable.
 
 #####Step 5: Eliminate any row (record) which has no date#####
 Any event with a missing value for the date of the event are removed and not used in any subsequent analysis.
 
 #####Step 6: Change blank, "N/A","Unknown", and similar responses to NA#####
-All missing data is replaced with the R symbol NA. Missing data in an event's record could be be blank, which would occur for a numeric variable, or for character variables it could match one of the following character strings: "", ".", "N/A", "UNK","Unknown",or "Unavailable".
+All missing data is replaced with the R symbol NA. Missing data in an event's record could be blank, which would occur for a numeric variable, or for character variables it could be a null character, one or more spaces, or a variety of character strings, such as "N/A", "UNK","Unknown",or "Unavailable."
+
+This step also puts the content for the airport name, air carrier, and aircraft make into title case. In the XML version of this program, airport names that contain an umlat are not capitalized by the function toTitleCase().
 
 #####Step 7: Specify city name, state abbreviation, and full state name#####
 The NTSB uses a location variable that typically includes the city and two-letter state abbreviation for any US location. The program adds three additional variables for the US city, two-letter state abbreviation, and full state name. It then scans the location variable for any character string that includes at least one comma, checks to see if the last comma is followed by a two-character sequence that matches a state code. If that is the case, the city name, state abbreviation, and full state name are added to those events.
@@ -106,14 +106,17 @@ A review of the full database revealed that for US locations, two-character abbr
 
 There were a total of 62 two-character identifiers used in the program, with 59 representing standard US Postal Service identifiers for states, territories, and the District of Columbia; as well as three non-standard codes for bodies of water.
 
-#####Step 8: Arrange the new columns in logical groupings#####
-The new variables (columns) associated with  the date and location of the event were appended to the end (right side) of the R data frame. The columns representing the new variables were regrouped so that they were adjacent to the appropriate NTSB variable.
+#####Step 8: Add variables for the magnitude and extent of injuries#####
+This step creates additional variables (columns) that indicate the magnitude of the greatest injury casued by the event, as well as variables for the total number of injuries (minor plus serious injuries), as well as the total number of people involved in the event (total killed, total injured, and total uninjured).
 
-#####Step 9: Save the processed data frame as a CSV file#####
-The last step saves the output into your working directory in a CSV file named "ntsb_data.csv".
+#####Step 9: Arrange the new columns in logical groupings#####
+The new variables (columns) associated with the date and location of the event, the number of people involved in the event, as well as the variables for the magnitude and extent of injuries and maximum were were regrouped so that they were adjacent to the appropriate NTSB variable.
+
+#####Step 10: Save the processed data frame as a CSV file#####
+The last step saves the output into the working directory used by the program in both CSV file named "ntsb_data.csv" and a text file named "ntsb_data.txt". The difference betweeen the two is that the CSV file has "NA" entered for missing values and the text file has nothing entered. The text file is also created in the same style as the text file output from the NTSB database, with a vertical bar (with a space on either side) separating the variables in each record.
 
 ###Sample summary statistics###
-The following are a sample of the kind of summary statistics and graphics that can be generated using the R programming language. They are based on a download of the complete database that was made on 12 December 2015.
+The following are a sample of the kind of summary statistics and graphics that can be generated using the R programming language. They are based on a portion of the NTSB database that was downloaded on 4 September 2016, and includes only those records dated from 1 January 2005. The summary statistics below used a text file as its input.
 ```{r echo=FALSE}
 filename <- "AviationData.txt" 
 ntsb.data.raw = read.delim(filename, header=TRUE, sep="|",  quote = "",dec = ".",fill = TRUE, comment.char = "")
@@ -122,7 +125,7 @@ ntsb.data = ntsb.data.raw
 # DATA CLEANING
 
 # Step 1: Eliminate any columns (variables) added as a consequence of Step 0,
-# columbns which have no data (all are NA)
+# columns which have no data (all are NA) 
 elim.var = which(apply(ntsb.data, 2, function(x) all(is.na(x))))
 elim.var = as.data.frame(elim.var) # Column name and column number of this data frame are the columns to be cut
 
@@ -180,7 +183,6 @@ for (i in 1:length(num.vecs.ndx)) {
        ntsb.data[,num.vecs.ndx[i]] = as.numeric(as.character(ntsb.data[,num.vecs.ndx[i]]))
 }
 
-
 # Step 4: Change date variables into a format suitable for R
 
 # Dates are in form mm/dd/YYYY, must convert to a date format of YYYY-mm-dd
@@ -201,22 +203,35 @@ ntsb.data$Weekday = weekdays(ntsb.data$Event.Date, abbreviate = TRUE)
 ntsb.data$Month = factor(ntsb.data$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
                                                   "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
 
-
 ntsb.data$Weekday = factor(ntsb.data$Weekday,levels=c("Sun","Mon","Tue",
                                                       "Wed","Thu","Fri","Sat"), ordered=TRUE)
-
-
 
 # Step 5 Eliminate any rows (records) which has no date (Event.Date is NA)
 elim.row = which(is.na(ntsb.data$Event.Date))
 if (length(elim.row)>0) ntsb.data = ntsb.data[-elim.row,] # Eliminates all rows with only NA value for Event.Date
 
-# Step 6: Changing blank, "N/A","Unknown", and similar responses to NA
+# Step 6: Change blank, "N/A","Unknown", and similar responses to NA
+
+# Must first put airport names and make in title case, first by using tolower() followed by toTitleCase()
+
+# Will install {tools} package for title case function
+# The first step is to install new packages that will be needed for the analysis.
+
+# In this case, the function needed is toTitleCase(text)
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+if("tools" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("tools")}
+library(tools)
+
+# This has to be done before any effort to replace words like "UNK", and "NA" with NA
+ntsb.data$Airport.Name = toTitleCase(tolower(ntsb.data$Airport.Name))
+ntsb.data$Air.Carrier = toTitleCase(tolower(ntsb.data$Air.Carrier))
+ntsb.data$Make = toTitleCase(tolower(ntsb.data$Make))
+# NOTE: Not a perfect solution, does not take into account names like McFarland, will end up as Mcfarland
 
 # First, define  a vector of words or phrases that are to be replaced with NA
-repl.words = c("", ".", "N/A", "UNK","Unknown","Unavailable")
-
-# Note that the following checks all columns, event non-character one, but in the end,
+repl.words = c("", ".", "N/A", "n/a", "N/a","NA","na","Na", "none", "None", "UNK","Unknown","Unavailable", "UNKNOWN", "unknown", "Unk", "unk")
+# Note that the following checks all columns, even non-character one, but in the end,
 # only character columns will have any non-zero values for replacement words
 repl.list = apply(ntsb.data,2, function(x) which(x %in% repl.words))
 
@@ -240,13 +255,20 @@ for(i in 1:length(with.missing.ndx)){
 
 
 # Step 7: Specify city name, state abbreviation, and full state name
-# for any location in the United states
+# for any location in the United states. 
 
-# Will focus only on rows with a US city address entered, implying the following is true
-# ntsb.data$Location is not NA and ntsb.data$Country=="United States"
-city.locs = !(is.na(ntsb.data$Location)) & ntsb.data$Country=="United States"
-# The following are the locations in the vector where this is true
-city.locs.ndx = which(city.locs) 
+
+# This step will eliminate rows that have NA as the location AND NA as the country
+# Will not add city or state if not one of the identifiable US abbreviations
+
+# First, get the index of records with non-NA locations
+#       which(!is.na(ntsb.data$Location))
+# Second, get the index of records with non-NA countries 
+#       which(!is.na(ntsb.data$Country))
+# Now get a vector that is the union of these two indices
+# where there is either a country or a location that is not NA
+city.locs.ndx = union(which(!is.na(ntsb.data$Location)), which(!is.na(ntsb.data$Country)) )
+ntsb.data = ntsb.data[city.locs.ndx,]
 
 # STATE CODES: Before adding full state names to data frame, must match
 # two-letter state codes with full state names.
@@ -277,6 +299,8 @@ usps.state = c(state.name,extra.name)
 comma.pos = rep(NA,nrow(ntsb.data)) # start with NA for number of commas for all Locations
 city.vec = rep(NA,nrow(ntsb.data))
 state.vec = rep(NA,nrow(ntsb.data))
+
+
 
 for(x in 1:length(city.locs.ndx)){
         # Create a list that contains vector of comma positions
@@ -314,10 +338,54 @@ for (i in 1:length(city.locs.ndx)){
 
 # Can now add city and state abbrevications, and full state names to data frame
 ntsb.data$City=city.vec
+ntsb.data$City = toTitleCase(tolower(ntsb.data$City)) # Ensure city names are in title case
+
 ntsb.data$State.code=state.vec
 ntsb.data$State=state.full
 
-# Step 8: Arrange the new columns in logical groupings
+
+# Step 8: Add a new variable that has the maximum injury outcome (Fatal, Injury, or None) for
+#       every record with at least one non-NA value for the number of fatalities,
+#       injuries (serious, minor, or none). Total number of fatalities already given by 
+#       variable Total.Fatal.Injuries, so just need the non-NA  values greater than zero for fatal Max.Injury value
+
+# First, the Max.Injury fatals
+ntsb.data$Max.Injury = rep(NA,nrow(ntsb.data)) # start with NA for maximum injury
+fatal.ndx = which(ntsb.data$Total.Fatal.Injuries > 0)
+ntsb.data$Max.Injury[fatal.ndx] = "Fatal"
+
+# Second, the Max.Injury injuries. For Max.Injury to be equal to Injury, there must be at 
+#       least one minor or serious injury, and no fatalities
+#       Get the index of fatals and the index of injuries,
+#       find the intersection, then take away the intersection from the
+#       index of injuries.
+
+injury.ndx = which(ntsb.data$Total.Serious.Injuries > 0 | ntsb.data$Total.Minor.Injuries>0)
+injury.only.ndx = setdiff(injury.ndx,intersect(injury.ndx,fatal.ndx)) # Injuries, but not fatalitiesf
+ntsb.data$Max.Injury[injury.only.ndx] = "Injury"
+
+# Lastly, the no injury events, which would be the no injury events, 
+#       excluding the Max.Injury injury events previously marked as "Fatal" or "Injury"
+no.injury.ndx = which(ntsb.data$Total.Uninjured > 0)
+no.injury.ndx = setdiff(no.injury.ndx,union(fatal.ndx,injury.only.ndx))
+ntsb.data$Max.Injury[no.injury.ndx] = "None"
+
+# Also adding a variable for total total injuries, and total number of people involved
+#       for records with non-NA data
+
+ntsb.data$Total.Injured = rep(NA,nrow(ntsb.data))
+ntsb.data$Total.Injured[injury.ndx] = apply(ntsb.data[injury.ndx, c("Total.Serious.Injuries","Total.Minor.Injuries")],1,sum,na.rm=TRUE)
+
+# For total number of people involved, need index of every row with at least one non-zero value for
+#       fatals, minor injuries, serious injuries, or no injuries
+occupied.ndx = unique(sort(c(fatal.ndx,injury.ndx,no.injury.ndx))) # non-duplicated
+
+ntsb.data$Total.Involved = rep(NA,nrow(ntsb.data))
+ntsb.data$Total.Involved[occupied.ndx] = apply(ntsb.data[occupied.ndx, c("Total.Fatal.Injuries","Total.Serious.Injuries","Total.Minor.Injuries","Total.Uninjured")],1,sum,na.rm=TRUE)
+
+
+
+# Step 9: Arrange the new columns in logical groupings
 
 new.cols = c("Event.Id", "Investigation.Type", "Accident.Number",
              "Event.Date", "Year", "Month", "Day", "Weekday",
@@ -327,19 +395,39 @@ new.cols = c("Event.Id", "Investigation.Type", "Accident.Number",
              "Registration.Number", "Make", "Model", "Amateur.Built",
              "Number.of.Engines", "Engine.Type", "FAR.Description", "Schedule",
              "Purpose.of.Flight", "Air.Carrier", "Total.Fatal.Injuries",
-             "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Uninjured",
+             "Total.Serious.Injuries", "Total.Minor.Injuries", "Total.Injured", "Total.Uninjured", "Total.Involved",
+             "Max.Injury",
              "Weather.Condition", "Broad.Phase.of.Flight", "Report.Status",
              "Publication.Date")
 
 ntsb.data = ntsb.data[,new.cols]
+
+# Step 10 (Final step): Save the processed data frame as a CSV and Text file
+
+# First output file is a CSV file direct from the data frame using default options for write.csv function
+write.csv(ntsb.data, file = "ntsb_data.csv", row.names = FALSE)
+
+# Second output file replaces all NA values with a null-type character before export, 
+#       removes any row numbers, and adds a seperator consisting of a vertical bar with a space on each side.
+
+# This makes the output consistent with the NTSB text file output format, and
+#       also makes it easier to do a side-by-side comparison with NTSB output using data visualization
+#       software like Tableau or data cleaning software like OpenRefine
+ntsb.data.text = ntsb.data
+ntsb.data.text = sapply(ntsb.data.text, as.character)
+ntsb.data.text[is.na(ntsb.data.text)] = "" 
+ntsb.data.text = as.data.frame(ntsb.data.text)
+write.table(ntsb.data.text, file = "ntsb_data.txt", sep = " | ", quote = FALSE, row.names = FALSE)
+
 ```
 ####Quick overview of data from the NTSB database####
-Note that although the online NTSB database was intended for events from 1982 onwards, there were a handful of events from before 1982.
+Note that although the online NTSB database was intended for events from 1962 onwards, there was at least one event from before 1962.
 
 * Total number of records - `r paste(format(nrow(ntsb.data.raw), big.mark=","), sep="")`
 * Number of records excluded - `r nrow(ntsb.data.raw)-nrow(ntsb.data)`
 * Number of records processed - `r paste(format(nrow(ntsb.data), big.mark=","), sep="")`
-* Number of processed records with a date before 1982 - `r paste(nrow(ntsb.data[ntsb.data$Year<1982,]))`
+* Date of most recent record - `r paste(max(ntsb.data$Event.Date)[1])`
+* Number of processed records with a date before 2005 - `r paste(format(nrow(ntsb.data[ntsb.data$Year<2005,]), big.mark=","), sep="")`
 * Number of records with a US location - `r paste(format(nrow(ntsb.data[which(ntsb.data$Country=="United States"),]), big.mark=","), sep="")`
 * Number of processed records inovlving fatalities `r paste(format(sum(ntsb.data$Total.Fatal.Injuries>=1, na.rm=TRUE), big.mark=","), sep="")`
 
@@ -347,52 +435,52 @@ Note that although the online NTSB database was intended for events from 1982 on
 
 ```{r echo=FALSE}
 
-# Vector of fatal events from 1982 onwards
-fatal.vec = which(ntsb.data$Total.Fatal.Injuries>=1 & ntsb.data$Year>=1982)
+# Vector of fatal events from 2005 onwards
+fatal.vec = which(ntsb.data$Total.Fatal.Injuries>=1 & ntsb.data$Year>=2005)
 
-# Data frame of all fatals from 1982 and beyond
+# Data frame of all fatals from 2005 and beyond
 fatal.df = ntsb.data[fatal.vec,]
 
 
-# Histogram of top 15 states by number of events 1982-2015
-barplot(sort(table(ntsb.data[ntsb.data$Year>=1982,]$State.code), 
+# Histogram of top 15 states by number of events since 1 January 2005
+barplot(sort(table(ntsb.data[ntsb.data$Year>=2005,]$State.code), 
         decreasing = TRUE)[1:15], col="dodgerblue",xlab="State", ylab="Events", 
-        cex.names = 0.7, main="Top 15 states by number of events 1982-2015")
+        cex.names = 0.7, main="Top 15 states by number of events since 1 January 2005")
 
-# Histogram of top 15 states by number of fatal events 1982-2015
+# Histogram of top 15 states by number of fatal events since 1 January 2005
 barplot(sort(table(ntsb.data[fatal.vec,]$State.code), decreasing = TRUE)[1:15],
         col="dodgerblue",xlab="State", ylab="Fatal events",
-        cex.names = 0.7, main="Top 15 states by number of fatal events: 1982-2015")
+        cex.names = 0.7, main="Top 15 states by number of fatal events since 1 January 2005")
 
 # Histogram events by day of the week
-barplot(table(ntsb.data[ntsb.data$Year>=1982,]$Weekday), col="dodgerblue",
-     xlab="Day", ylab="Events", main="Events by day of week: 1982 - 2015")
+barplot(table(ntsb.data[ntsb.data$Year>=2005,]$Weekday), col="dodgerblue",
+     xlab="Day", ylab="Events", main="Events by day of week: since 2005")
 
 # Histogram of fatal events by day of the week
 barplot(table(fatal.df$Weekday), col="dodgerblue", cex.names = 1.2,
-        xlab="Day", ylab="Events", main="Fatal events by day of week: 1982 - 2015")
+        xlab="Day", ylab="Events", main="Fatal events by day of wee since 1 January 2005")
 
 
 # Histogram of events by month of the year
-barplot(table(ntsb.data[which(ntsb.data$Year>=1982),]$Month), col="dodgerblue", cex.names = 0.8,
-        xlab="Month", ylab="Events", main="Events by month: 1982-2015")
+barplot(table(ntsb.data[which(ntsb.data$Year>=2005),]$Month), col="dodgerblue", cex.names = 0.8,
+        xlab="Month", ylab="Events", main="Events by month since 1 January 2005")
 
 # Histogram of fatal events by month of the year
 barplot(table(fatal.df$Month), col="dodgerblue", cex.names = 0.8, xlab="Day",
-        ylab="Fatal events", main="Fatal events by month: 1982-2015")
+        ylab="Fatal events", main="Fatal events by monthsince 1 January 2005")
 
-# Histogram of fatal events by year 1982 - 2015
+# Histogram of fatal events by year since 1 January 2005
 barplot(table(ntsb.data[fatal.vec,]$Year), col="dodgerblue",
-     xlab="Year", ylab="Fatal events", main="Fatal events by year: 1982 - 2015")
+     xlab="Year", ylab="Fatal events", main="Fatal events by yearsince 1 January 2005")
 
 # -------
-# Fatalites by year 1982 - 2015
+# Fatalites by year since 2005
 
 # Do a tapply for sums by category then ensure it is table
 death.table = as.table(tapply(fatal.df$Total.Fatal.Injuries, fatal.df$Year, sum))
 
 barplot(death.table, col="dodgerblue",
-     xlab="Year", ylab="Fatalities", main="Fatalities by year: 1982 - 2015")
+     xlab="Year", ylab="Fatalities", main="Fatalities by year")
 # -------
 
 ```
@@ -403,30 +491,31 @@ The NTSB database is one of the many data-related resources available on on some
 In addition, the R programs that are available in the links below may be adapted for other data resources that have a similar structure to the kinds of text and XML outputs provided by the NTSB.
 
 ###Resources###
-NTSB Aviation Accident Database & Synopses
+NTSB Aviation Accident Database & Synopses  
 http://www.ntsb.gov/_layouts/ntsb.aviation/index.aspx
 
-Data dictionary for the online NTSB database
+Data dictionary for the online NTSB database  
 http://www.ntsb.gov/_layouts/ntsb.aviation/AviationDownloadDataDictionary.aspx
 
-Data dictionary for the output of the two AirSafe.com R programs
+Data dictionary for the output of the two AirSafe.com R programs  
 http://www.airsafe.com/analyze/ntsb-data-dictionary.pdf
 
-R files used in this report 
-https://github.com/airsafe/analyses/blob/master/ntsb.convert.txt.R (Text)
+R files used in this report  
+https://github.com/airsafe/analyses/blob/master/ntsb.convert.txt.R (Text)  
 https://github.com/airsafe/analyses/blob/master/ntsb.convert.xml.R (XML)
 
-Downloaded NTSB data used in this report
-http://www.airsafe.com/analyze/AviationData.txt (Text)
+Downloaded NTSB data used in this report  
+http://www.airsafe.com/analyze/AviationData.txt (Text)  
 http://www.airsafe.com/analyze/AviationData.xml (XML)
 
-Processed NTSB data used in this report
-http://www.airsafe.com/analyze/ntsb_data.csv
+Processed NTSB data used in this report  
+http://www.airsafe.com/analyze/ntsb_data.csv (CSV)  
+http://www.airsafe.com/analyze/ntsb_data.txt (Text)
 
-Data dictionary for the processed NTSB data
+Data dictionary for the processed NTSB data  
 http://www.ntsb.gov/_layouts/ntsb.aviation/AviationDownloadDataDictionary.aspx
 
-Converting NTSB database downloads (this report)
-HTML - http://www.airsafe.com/analyze/ntsb.database.html
-Rmd - https://github.com/airsafe/analyses/blob/master/ntsb.database.Rmd
-RPubs - http://rpubs.com/airsafe/ntsb_database
+Converting NTSB database downloads (this report)  
+HTML - http://www.airsafe.com/analyze/ntsb.database.html  
+Rmd - https://github.com/airsafe/analyses/blob/master/ntsb.database.Rmd  
+RPubs - http://rpubs.com/airsafe/ntsb_database 
