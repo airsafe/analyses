@@ -1,25 +1,42 @@
 # Basic spike program
 # Import data (data files online in directory http://www.airsafe.com/analyze/)
 
+# ADMINISTRATIVE NOTES
+# Note: To describe database at any point, use str(*name*)
+# Note: To clear R workspace, use rm(list = ls())
+# Note: Searching R help files - RSiteSearch("character string")
+# Note: To clear console, use CTRL + L 
+
 sessions.raw = NULL
 sessions = NULL
 range = 28
-# Offset if we want to move the end of the 21 day range to (offset + 1) day prior to the day being measured
+# Offset if we want to move the end of the 28-day range to (offset + 1) day prior to the day being measured
 offset = 7
 # Download raw session data
-sessions.raw <- read.csv("http://airsafe.com/analyze/sessions.csv", header = TRUE)
+# The raw CSV file Format
+#       Two colunms the headers "Day Index" and "Sessions"
+#       Column 1 is in the date format m/d/yy
+#       Column 2 is an integer representing the number of sessions that day  
+#sessions.raw <- read.csv("http://airsafe.com/analyze/sessions.csv", header = TRUE)
+# File has two columns:
+#       Day Index - Date variable with the format %m/%d/%y 
+#       Sessions - Number of sessions. In general, a session
+#       A session is a group of user interactions with 
+#       the site that takes place within a given time frame. 
 
+
+sessions.raw <- read.csv("sessions.csv", header = TRUE)
 # Ensure that working data is in a data frame 
 sessions = as.data.frame(sessions.raw)
 
-# Change the column names
+# Ensure the column names are called "Date" and "Sessions"
 colnames(sessions) = c("Date","Sessions")
 colnames(sessions.raw) = c("Date","Sessions")
 
 # Convert column of session values from factor to numeric
 sessions$Sessions = as.numeric(as.character(sessions.raw$Sessions))
-# Dates are in form 5/1/2006, must convert to a date format of yyyy-mm-dd
-sessions$Date = as.Date(sessions.raw[,1], "%m/%d/%Y")
+# Dates are in form 5/1/06, must convert to a date format of yyyy-mm-dd
+sessions$Date = as.Date(sessions.raw[,1], "%m/%d/%y")
 
 
 # Add columns for the mean and standard deviation of previous defined range of days of sessions and give them a default value to aid in identifying days without a spike measurment
@@ -32,7 +49,7 @@ sessions$Spike2mean = -1
 
 
 # This loop will compute each day's mean, and standard deviation for the previous range of days, starting
-#        with the 22nd day of data      
+#        with the 35th day of data (with seven day offset, first 28-day comparison period is available starting day 35)     
 for(i in (range + offset): nrow(sessions)) 
 {
         sessions$date_index[i] = i-(range + offset) + 1
@@ -47,7 +64,7 @@ for(i in (range + offset): nrow(sessions))
 
 summary(sessions$Sessions)
 summary(log(sessions$Sessions))
-hist(sessions$Sessions, main="Historgram of session values", xlab="Number of sessions")
+hist(sessions$Sessions, freq=TRUE, main="Historgram of session values", xlab="Number of sessions", ylab="Frequency")
 hist(log(sessions$Sessions), main="Historgram of log(session values)", xlab="log(Number of sessions)")
 
 sessions$Spike =  round(sessions$SpikeSD, digits=2) >= 2 # Identifies as spike any SpikeSD of 2 or more
