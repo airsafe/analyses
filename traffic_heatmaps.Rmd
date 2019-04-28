@@ -1,20 +1,22 @@
 ---
-title: "AirSafe.com traffic spikes heat maps May 2006 to November 2015"
+title: "AirSafe.com traffic spikes heat maps May 2006 to 30 October 2018"
 author: "Todd Curtis"
-date: "November 22, 2015"
-output: html_document
+date: "October 31, 2018"
+output:
+  pdf_document: default
+  html_document: default
 ---
 ###Summary###
-A previous AirSafe.com study, [AirSafe.com traffic spikes May 2006 to November 2015](http://rpubs.com/airsafe/spikes),  reviewed traffic to the web site and determined that a total of 266 days over that over nine and one half year time span where the estimated number of visits to the site was at least two standard deviations higher than the average number of visits during a 28-day comparison period. The previous study showed that most of these events, called traffic spikes, were associated with identifiable aerospace-related events, and that spike days were more likely during some days of the week. This study used the same data from the previous study to create visual summaries of the traffic spike data that would help to further illustrate traffic spike patterns associated with the day of the week and to show if there were also clear patterns showing up in longer time scales.
+A previous AirSafe.com study, [AirSafe.com traffic spikes May 2006 to November 2015](http://rpubs.com/airsafe/spikes),  reviewed traffic to the web site and determined that a total of 266 days over that over nine and one half year time span where the estimated number of visits to the site was at least two standard deviations higher than the average number of visits during a 28-day comparison period. The previous study showed that most of these events, called traffic spikes, were associated with identifiable aerospace-related events, and that spike days were more likely during some days of the week. This study extends the original study by nearly 20 months to create similar visual summaries of data from 316 spike days that would help to further illustrate traffic spike patterns associated with the day of the week and to show if there were also clear patterns showing up in longer time scales.
 
 ###Introduction###
 The web site [AirSafe.com](http://www.airsafe.com/), which has been in operation since July 1996, provides the aviation safety community and the general public with useful information about aviation safety and security. The site highlights a particular class of events, which it defines as [significant events](http://www.airsafe.com/events/define.htm), a category that typically includes events involving airliner deaths or other aerospace events that attract significant amounts news media attention. These significant events all all listed in one or more places on AirSafe.com, but at a minium are listed on summary pages that list the significant events from a given year.
 
-Between 10 May 2006 and 14 November 2015, there were 266 days with significant traffic spikes on AirSafe.com, specifically days where the estimated number of visits to the site exceeded the average number of visit in a 28-day period that begins five weeks before the day being measured, and ends one week prior to the day being measured by two or more standard deviations. For example, the number of visits on 31 October 2015 would be compared with the distribution of the number of visits from the period 27 September 2015 to 24 October 2015.
+Between 10 May 2006 and 13 July 2018, there were 316 days with significant traffic spikes on AirSafe.com, specifically days where the estimated number of visits to the site exceeded the average number of visit in a 28-day period that begins five weeks before the day being measured, and ends one week prior to the day being measured by two or more standard deviations. For example, the number of visits on 31 October 2015 would be compared with the distribution of the number of visits from the period 27 September 2015 to 24 October 2015.
 
 Traffic on the site is measured by Google Analytics, which uses tracking codes that provided detailed information about how users interact with the web site. The code doesn’t track individuals, but rather interactions that [Google Analytics defines as a session](https://support.google.com/analytics/answer/2731565?hl=en), which is an interaction between AirSafe.com and some identifiable location or device that is connected to the Internet.
 
-Between May 2006 and November 2015, significant traffic spikes on AirSafe.com, specifically days where the estimated number of visits to the site exceeded the average number of visit in a 28-day comparison period by more than two standard deviations, frequently occurred within seven days of widely reported events involving airline safety and security, but there were a number of spikes that occurred that were unrelated to a recent safety or security event. 
+Between May 2006 and July 2018, significant traffic spikes on AirSafe.com, specifically days where the estimated number of visits to the site exceeded the average number of visit in a 28-day comparison period by more than two standard deviations, frequently occurred within seven days of widely reported events involving airline safety and security, but there were a number of spikes that occurred that were unrelated to a recent safety or security event. 
 
 ###Purpose of the analysis###
 The intent of this analysis is to take the information about spikes, specifically the days that the spike occurs, and to put them in to a visual display that may reveal patterns of spike creation, specifically patterns related to th days of the week or the months of of the year that spikes occur. 
@@ -24,7 +26,7 @@ Traffic on the site is measured using Google Analytics, which provides detailed 
 
 On AirSafe.com, sessions are identified by one or more interactions with the web site, where either a single interaction is followed by 30 minutes of inactivity, or where multiple interactions, for example visits to different pages, that are separated by fewer than 30 minutes.
 
-There is not necessarily a one to one relationship between a session and the actions of the entity or individual responsible for the interaction that results in a session. The tracking code logs a visit from an identifiable location, such as a mobile phone or server. Without further information, it is difficult to determine what or who could be responsible for a single session. For example, the following could all represent one session:
+There is not necessarily a one-to-one relationship between a session and the actions of the entity or individual responsible for the interaction that results in a session. The tracking code logs a visit from an identifiable location, such as a mobile phone or server. Without further information, it is difficult to determine what or who could be responsible for a single session. For example, the following could all represent one session:
 
 - One person visiting a single page and spending fewer than 10 seconds on the site,
 
@@ -36,20 +38,31 @@ There is not necessarily a one to one relationship between a session and the act
 
 There is also insufficient information to identify situations where two or more concurrent sessions may actually represent the same person or entity accessing the site on multiple devices, for example, visiting first on a mobile phone before switching to a desktop.
 
+In the earlier version of this analysis that included data from 6 April 2006 trough 14 November 2015 (downloaded 15 November 2015), the values used for the number of sessions was consistently higher than the data for the same date range used in this analysis (downloaded 14 July 2018). The session data downloaded in 2015 was on average 4.9% higher than the session data from the same dates downloaded in 2018, with a minimum differece of +0.51% and a maximum difference of +11.66% higher.  
+
+All the data used in this analysis was downloaded on 14 July 2018.
+
 In spite of these and other limitations, two reasonable assumptions were made about session data:
 
-- That a large majority of the session represent the actions of individual people,
+- That a large majority of the sessions represent the actions of individual human beings rather than due to the output of crawlers, bots, or other automated traffic generation systems,
 
 - That changes in the number of sessions are highly correlated with changes in the number of individuals accessing the site.
 
 ###Data###
-The key source of data were the AirSafe.com session data provided by Google Analytics. The period covered by this study was from 6 April 2006 to 14 November 2015.
+The key source of data were the AirSafe.com session data provided by Google Analytics. The period covered by this study was from 6 April 2006 to 13 July 2018.
 
 
 
   
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 # Import data (data files online in directory http://www.airsafe.com/analyze/)
+
+
+# ADMINISTRATIVE NOTES
+# Note: To describe database at any point, use str(*name*)
+# Note: To clear R workspace, use rm(list = ls())
+# Note: Searching R help files - RSiteSearch("character string")
+# Note: To clear console, use CTRL + L 
 
 sessions.raw = NULL
 sessions = NULL
@@ -58,7 +71,8 @@ range = 28
 # day prior to the day being measured
 offset = 7
 # Download raw session data
-sessions.raw <- read.csv("http://airsafe.com/analyze/sessions.csv", header = TRUE)
+#sessions.raw <- read.csv("http://airsafe.com/analyze/sessions.csv", header = TRUE)
+sessions.raw <- read.csv("sessions.csv", header = TRUE)
 
 # Ensure that working data is in a data frame 
 sessions = as.data.frame(sessions.raw)
@@ -83,10 +97,10 @@ sessions = as.data.frame(sessions.raw)
     
     * Spike2mean - Ratio of a particular day's session value and the mean number of sessions from the comparison period value
     
-The values of these columns were all initialized to the value -1. Based on the session data, the values in each of these five new coloumns, starting with the 29td row, would be updated to reflect the values computed from 28-day comparison period.
+The values of these columns were all initialized to the value -1. Based on the session data, the values in each of these five new coloumns, starting with the 29th row, would be updated to reflect the values computed from 28-day comparison period.
 
   
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Change the column names
 colnames(sessions) = c("Date","Sessions")
@@ -94,8 +108,8 @@ colnames(sessions.raw) = c("Date","Sessions")
 
 # Convert column of session values from factor to numeric
 sessions$Sessions = as.numeric(as.character(sessions.raw$Sessions))
-# Dates are in form 5/1/2006, must convert to a date format of yyyy-mm-dd
-sessions$Date = as.Date(sessions.raw[,1], "%m/%d/%Y")
+# Dates are in form 5/1/06, must convert to a date format of yyyy-mm-dd
+sessions$Date = as.Date(sessions.raw[,1], "%m/%d/%y")
 
 
 # Add columns for the mean and standard deviation of previous defined range of days of 
@@ -123,12 +137,12 @@ for(i in (range + offset): nrow(sessions))
 ###Data overview of session values###
 Because the number of sessions on a particular day had to be compared to the 28-day period that begins 35 days before the day being measured, the first date that could be checked for spikes was 10 May 2006, which was the 35th day after th first date with session data, 6 April 2015.
 
-The initial exploratory data analysis of the session data showed a wide range of values from under 200 to over 75,000 sessions in a particualr day. The following histograms show that that the number of sessions showed a distict postive (rightward skew), however, the log of the session values reveals a much more symmetric distribution. 
+The initial exploratory data analysis of the session data showed a wide range of values from under 200 to over 70,000 sessions in a particualr day. The following histograms show that that the number of sessions showed a distict postive (rightward skew), however, the log of the session values reveals a much more symmetric distribution. 
 
 Because this study was looking at comparisons of a particular day's session values with the distribution of the sample mean of sessions from a subset of the entire range of session values, it was not necessary to model the distribution of the entire population of sessions. It was sufficient to employ the centeral limit theorem and assume a normal distribution of the sample mean of a 28-day sequence of session values.
 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Summary and histogram of the sessions data
 
@@ -147,7 +161,11 @@ hist(log(sessions$Sessions), main="Historgram of log(session values)",
 ###Identifying spike days###
 The next steps included adding a logical vector (SpikeSD) for the spike days, defined as those days were the number of sessions was at least two standard deviations higher than the average number of sessions from the comparison period. Also, the days that were measured were tranfered into a separate data frame (measured.days). 
 
-The data from the subset of days with a significant spike in sessions was put into a separate data frame. A total of 266 days met this criteria. In addition, three new variables were added representing the day of the week, the month, and the year that the spike occurred (Day, Month, and Year respectively). A redundant variable (Spike) eliminated since all the values in spike.days would be TRUE. 
+The data from the subset of days with a significant spike in sessions was put into a separate data frame. A total of 316 days met this criteria. In addition, three new variables were added representing the day of the week, the month, and the year that the spike occurred (Day, Month, and Year respectively). A redundant variable (Spike) eliminated since all the values in spike.days would be TRUE. 
+
+Note that in the dates covered in the original analysis in 2015, there were 266 spike days. The data downloaded for this analysis, which had values for the number of sessions that was universally lower than the session values for the comparative days from the original analysis, had three fewer spike days (263 vs. 266). 
+
+This updated analysis included 972 additional days, which also included 53 spike days. These maximum standard deviation during this 53 spike days was 23.7. That compares with a maximum of 74.3 over the entire range of days.
 
 This data frame representing the days that were measured (measured.days) and the days with spikes (spike.days) were archived in CSV files that are available at  
 
@@ -162,16 +180,16 @@ It was assumed that for those cases where the spike was associated with a signif
 
 - AirSafe.com marketing efforts to drive traffic to particular web site content after a significant aviation safety or security event.
 
-- Web site searches related to a significant event. The site consistently gets about two-thirds of all traffic as the result of searches on major search engines like Google, Bing, and Yahoo, and an increase in the volume of searches for aviation-related online content often follows in the wake of high media interest in the subject in the aftermath of an event.
+- Web site searches related to a significant event. The site consistently gets about two-thirds of all traffic as the result of searches on major search engines like Google or Bing, and an increase in the volume of searches for aviation-related online content often follows in the wake of high media interest in the subject in the aftermath of an event.
 
 - From links on other web sites
 
-The remaining 31.6% of the spike days also did not show any clear or consistent pattern of occurrences, and it was unclear what factors mahy hve led to traffic spikes on those days.
+The remaining 31.6% of the spike days in the original analysis also did not show any clear or consistent pattern of occurrences, and it was unclear what factors mahy hve led to traffic spikes on those days.
 
 #####Spike days driven by multiple significant events#####
 The previous study pointed out that on three of the 266 spike days, there were two signifiant events which generated enough site traffic to independently lead to a spike day. Because this study was looking at the temporal pattern of spike days rather than the pattern of the magnitude of the traffic that led to the spike days, those three days were not treated treated any differently. 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Identifies as spike any SpikeSD (rounded to two significant digits) of 2 or more 
 sessions$Spike =  round(sessions$SpikeSD, digits=2) >= 2
@@ -202,7 +220,7 @@ Spikes were determined by the number of standard deviations, in part to deal wit
 Perhaps the most striking result was the days on when a spike occurred. Friday and Saturday had considerably fewer spike days than the rest of the week. A Chi-square test on the distibution of the spike days by day of the week had a p-value much smaller than 0.05, so one could reject the null hypothesis that spike days were uniformly distributed among the days of the week. Using the same approach to look at the distribution of spike days by month, a similar null hypotheses for the distributions by month also hada  p-value much smaller than 0.05, and would also be rejected.
 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Summary of distibutions of spike day sessions
 summary(spike.days$Sessions)
@@ -227,7 +245,7 @@ chisq.test(table(spike.days$Month))
 #####Distribution of spike days by month and year#####
 Two ways of looking at the distribution of the spike days by month and year is by using one-dimensional summarary tables (one for spikes by month and another for spikes by year), a two-dimensional summary table. Note that the one-dimensional summary tables below orders the results by decreaseing size.
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Distribution of spike days by month
 
@@ -259,7 +277,7 @@ These heat maps use a color scheme where the the lowest values are white and the
 #####Distribution of spike days to emphasize patterns of particular months#####
 There were four heat maps created from the underlying data. The first scaled the values for a given year (column values) by the month values across all years in order to show, for a particular month, what years had relatively high or low traffic. 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Creating heat map with a cyan to purple color scheme  (option is heat colors using heat.colors) 
 
@@ -279,7 +297,7 @@ The months of September, November, and December had relatively low numbers of sp
 
 #####Distribution of spike days to emphasize patterns of particular year#####
 The second heat map scaled the values for a given month (row values) across all years in order to show, for a particular year, what months had relatively high or low traffic. 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # When scaling by row (the month), the focus is on the years with a realtively high or low 
 #  number of spikes compared to other months
@@ -293,7 +311,7 @@ Using the same approach as was used to look at the spike day distribution by mon
 
 The two-dimensional table of spike days by day of the week is below, and shows both a significant number of spike days in 2014 for every day of the week, as well as a low number of spike days on Saturday. 
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Two-dimensional table of spike days by day of the weej and year
 
@@ -311,7 +329,7 @@ The third heat map is scaled by the column or x-axis values (Year), which will h
 
 This heat map clearly shows that Monday, Tuesday, and Wednesday have a relatively high proportion of spike days, and Friday and Saturday much less.
 
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 
 # Create a heat map for days of the week by ordering them with Sunday being the first day
 spike.ordered$Day = factor(spike.ordered$Day,levels=c("Sunday","Monday",
@@ -328,7 +346,7 @@ heatmap(table(spike.ordered$Day, spike.ordered$Year),Rowv=NA, Colv=NA,revC=TRUE,
 
 #####Distribution of spike days to emphasize day of the week patterns of particular years#####
 Scaling by row (day of the week) will emphasize the years that have a high number of spike days for a particular day of the week, and 2014 clearly stands out for a relatively high number of spikes for every day of the week, and 2012 has a relatively low number for all the days of the week.
-```{r, echo=TRUE}
+```{r, echo=FALSE}
 #  Heatmap of spikes by scaled by row (the day of the week) would highlight years with a 
 #  realtively high or low number of spikes compared to other years. Clearly 2014 is the winner.
 
