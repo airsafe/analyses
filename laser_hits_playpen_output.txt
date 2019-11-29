@@ -1,0 +1,1976 @@
+Processing start date and time
+Fri Nov 29 17:14:41 2019
+
+[1] "18  duplicated records were identified and removed, leaving  47430  events"
+
+[1] "There are initially  47430  records"
+
+[1] "46044  records have no missing data in the following key variables:"
+[1] "Date"          "Time"          "Aircraft_Type"
+[4] "Airport"       "Altitude"      "City"         
+[7] "State"        
+
+[1] "No date value is missing"
+
+[1] "Resulting data frame has 22483 rows and 21 columns:"
+ [1] "Event_ID"      "Date"          "Day_num"      
+ [4] "Month"         "Year"          "Weekday"      
+ [7] "Time"          "Raw_time"      "Hour_Category"
+[10] "Flight_ID"     "Model"         "Aircraft_Type"
+[13] "Altitude"      "Airport"       "Laser_color"  
+[16] "Injuries"      "City"          "State"        
+[19] "Metro_area"    "Altitude_log"  "Altitude_cat" 
+
+[1] "The data summary of these 21 columns are:"
+      Event_ID          Date           
+ E20100006:    1   Min.   :2010-01-01  
+ E20100007:    1   1st Qu.:2013-06-26  
+ E20100008:    1   Median :2015-10-28  
+ E20100009:    1   Mean   :2015-05-08  
+ E20100015:    1   3rd Qu.:2017-04-27  
+ E20100017:    1   Max.   :2018-12-31  
+ (Other)  :22477                       
+    Day_num          Month           Year     
+ Min.   : 1.00   Dec    :2224   Min.   :2010  
+ 1st Qu.: 8.00   Nov    :2211   1st Qu.:2013  
+ Median :16.00   Oct    :2169   Median :2015  
+ Mean   :15.81   Sep    :2056   Mean   :2015  
+ 3rd Qu.:23.00   Aug    :2019   3rd Qu.:2017  
+ Max.   :31.00   Jul    :1958   Max.   :2018  
+                 (Other):9846                 
+ Weekday        Time              Raw_time    
+ Sun:3064   Length:22483       0300   :  120  
+ Mon:3015   Class :character   0400   :  120  
+ Tue:3105   Mode  :character   0330   :  116  
+ Wed:2945                      0225   :  112  
+ Thu:3091                      0340   :  112  
+ Fri:3418                      0355   :  109  
+ Sat:3845                      (Other):21794  
+ Hour_Category    Flight_ID         Model      
+ 4      :4088   UPS1291:   22   B737   : 5137  
+ 3      :3781   UPS1339:   20   A320   : 2013  
+ 5      :3580   NKS126 :   18   B738   : 1948  
+ 2      :2916   NKS350 :   18   E170   : 1121  
+ 6      :2529   UPS1375:   17   B752   : 1111  
+ 1      :1512   (Other):22379   A319   : 1056  
+ (Other):4077   NA's   :    9   (Other):10097  
+ Aircraft_Type    Altitude        Airport     
+ 1:15650       Min.   :    0   LAX    : 1063  
+ 2: 2274       1st Qu.: 3000   PHX    :  843  
+ 3: 4067       Median : 6000   LAS    :  560  
+ 4:  492       Mean   : 8065   PDX    :  546  
+               3rd Qu.:10000   SAN    :  502  
+               Max.   :46000   SJC    :  496  
+                               (Other):18473  
+  Laser_color    Injuries              City      
+ Green  :20918   No  :22424   Los Angeles: 1063  
+ Blue   :  620   Yes :   51   Phoenix    :  876  
+ Red    :  257   NA's:    8   Houston    :  656  
+ White  :  202                Chicago    :  610  
+ Purple :   69                Las Vegas  :  572  
+ (Other):  256                Portland   :  572  
+ NA's   :  161                (Other)    :18134  
+        State               Metro_area   
+ California: 4984   Los Angeles  : 1694  
+ Texas     : 2021   New York     :  982  
+ Florida   : 1615   Phoenix      :  921  
+ Arizona   : 1112   San Francisco:  809  
+ New York  :  796   Miami        :  755  
+ Kentucky  :  747   (Other)      :11582  
+ (Other)   :11208   NA's         : 5740  
+  Altitude_log            Altitude_cat  
+ Min.   : 0.000   below_FL20    : 2427  
+ 1st Qu.: 8.006   FL20_to_FL180 :18098  
+ Median : 8.700   FL180_to_FL400: 1934  
+ Mean   : 8.607   above_FL400   :   24  
+ 3rd Qu.: 9.210                         
+ Max.   :10.736                         
+                                        
+
+[1] "The structure of the data frame is as follows"
+'data.frame':	22483 obs. of  21 variables:
+ $ Event_ID     : Factor w/ 22483 levels "E20100006","E20100007",..: 3361 932 9033 2739 19994 19485 17944 7949 770 1587 ...
+ $ Date         : Date, format: "2012-03-09" ...
+ $ Day_num      : num  9 13 25 29 10 10 30 8 15 9 ...
+ $ Month        : Factor w/ 12 levels "Jan","Feb","Mar",..: 3 9 3 10 3 1 8 10 8 3 ...
+ $ Year         : num  2012 2010 2015 2011 2018 ...
+ $ Weekday      : Factor w/ 7 levels "Sun","Mon","Tue",..: 6 2 4 7 7 4 4 4 1 4 ...
+ $ Time         : chr  "07:38" "07:08" "07:45" "07:55" ...
+ $ Raw_time     : Factor w/ 1711 levels "0","0000","0001",..: 1576 1546 467 1593 475 422 554 1536 1606 1703 ...
+ $ Hour_Category: Factor w/ 24 levels "1","2","3","4",..: 8 8 8 8 8 8 10 7 9 10 ...
+ $ Flight_ID    : Factor w/ 13590 levels "AA1736","AA917",..: 1666 1671 1692 1704 2062 2093 2918 3122 3502 4298 ...
+ $ Model        : Factor w/ 76 levels "A220","A300",..: 32 33 32 28 32 31 37 38 39 31 ...
+ $ Aircraft_Type: Factor w/ 4 levels "1","2","3","4": 1 1 1 1 1 1 2 2 1 1 ...
+ $ Altitude     : num  6000 1800 12000 6700 2500 9000 1500 8000 6000 6000 ...
+ $ Airport      : Factor w/ 1281 levels "00R","06C","0F2",..: 107 107 107 107 107 107 107 107 107 107 ...
+ $ Laser_color  : Factor w/ 32 levels "Amber","Blue",..: 3 3 3 3 3 3 3 8 3 3 ...
+ $ Injuries     : Factor w/ 2 levels "No","Yes": 1 1 1 1 1 1 1 1 1 1 ...
+ $ City         : Factor w/ 1061 levels "Aberdeen","Aberdeen Proving Grounds",..: 26 26 26 26 26 26 26 26 26 26 ...
+ $ State        : Factor w/ 54 levels "Alabama","Alaska",..: 2 2 2 2 2 2 2 2 2 2 ...
+ $ Metro_area   : Factor w/ 44 levels "Anchorage","Atlanta",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ Altitude_log : num  8.7 7.5 9.39 8.81 7.82 ...
+ $ Altitude_cat : Ord.factor w/ 4 levels "below_FL20"<"FL20_to_FL180"<..: 2 1 2 2 2 2 1 2 2 2 ...
+
+[1] "State and territory names not in the R state data"
+[1] "Puerto Rico"          "Guam"                
+[3] "Virgin Islands"       "District of Columbia"
+
+[1] "Every record is associated with a US state or territory"
+
+[1] "Delaware is in a unique position. It has very few air carrier operations"
+[1] "as most passengers fly out of airports outside of Delaware, primarily Philadelphia."
+[1] "In fact, over the nine-year period of the study, the state had an average of 25.2 air carrier operations per month,"
+[1] "causing the state to have a rate of laser encounters that was orders of  magnitude higher than any other state."
+
+[1] "Delaware's rate per 100K flights is 992.65 which is an order of magnitude higher than the next highest rate of 99.08"
+
+[1] "Looking at laser rates based on states is problematic for reasons besides the unusual Delaware situation"
+[1] "The rate of laser events may be affected by local conditions that may be within an area of a state, or an area covering two or more states."
+[1] "One alternative is to look at rates within well-defined area of population."
+[1] "One well-defined alternative is US Census defined Metropolitan Statistical areas around the largest US cities."
+
+[1] "The laser event rates within the top 20 US Metropolitan Statistical Areas (MSAs), were reviewed."
+
+[1] "This group included the largest US cities, including New York, Chicago, and Los Angeles."
+
+[1] "Two additional areas, which both contained large cities and which were also adjacent a top 20 MSA were also included."
+
+[1] "The two additional MSAs were the Santa Clara, CA Baltimore, MD MSAs, which were adjacent to  the San Francisco and Washington, DC MSAs."
+
+[1] "Each metropolitan area included any airport or other location with at least one air carrier event, or one air carrier operation"
+
+
+[1] "The following  44  metropolitan areas were analyzed:"
+ [1] "Anchorage"      "Atlanta"        "Austin"        
+ [4] "Baltimore"      "Boston"         "Charlotte"     
+ [7] "Chicago"        "Cincinnati"     "Cleveland"     
+[10] "Columbus"       "Dallas"         "Denver"        
+[13] "Detroit"        "Houston"        "Indianapolis"  
+[16] "Kansas City"    "Las Vegas"      "Los Angeles"   
+[19] "Louisville"     "Memphis"        "Miami"         
+[22] "Milwaukee"      "Minneapolis"    "Nashville"     
+[25] "New York"       "Orlando"        "Philadelphia"  
+[28] "Phoenix"        "Pittsburgh"     "Portland"      
+[31] "Providence"     "Riverside"      "Sacramento"    
+[34] "Saint Louis"    "Salt Lake City" "San Antonio"   
+[37] "San Diego"      "San Francisco"  "San Jose"      
+[40] "San Juan"       "Seattle"        "Tampa"         
+[43] "Virginia Beach" "Washington_DC" 
+
+[1] "List of airports, navaids, and other location identifiers in each metro area"
+
+Anchorage Metro area locations 
+[1] "ANC"
+
+Atlanta Metro area locations 
+ [1] "92GA" "ATL"  "CCO"  "CNI"  "FTY"  "GA04" "HRS" 
+ [8] "LZU"  "MGE"  "PDK"  "RYY" 
+
+Austin Metro area locations 
+[1] "3R9"  "85TX" "AUS"  "CQY"  "CWK"  "EDC"  "ELP" 
+[8] "GTU"  "T74" 
+
+Baltimore Metro area locations 
+[1] "ANP" "APG" "BAL" "BWI" "EMI" "FME" "MTN" "OTT"
+[9] "W29"
+
+Boston Metro area locations 
+ [1] "28M" "BED" "BOS" "BVY" "GHG" "LWM" "OWD" "PSM"
+ [9] "PYM" "TAN"
+
+Charlotte Metro area locations 
+[1] "CHA" "CLT" "HKY" "IPJ" "JQF"
+
+Chicago Metro area locations 
+ [1] "06C" "3CK" "ARR" "CGT" "DPA" "ENW" "EON" "GYY"
+ [9] "IGQ" "IUL" "JOT" "LOT" "MDW" "MGC" "OBK" "ORD"
+[17] "PIA" "PPO" "RFD" "UGN" "VPZ" "XXQ"
+
+Cincinnati Metro area locations 
+[1] "CVG" "FLM" "HAO" "K62" "LUK" "OXD"
+
+Cleveland Metro area locations 
+[1] "1G5" "BKL" "CLE" "CXR" "DJB" "LNN" "LPR" "UYF"
+
+Columbus Metro area locations 
+[1] "APE" "CMH" "MRT" "OSU" "VTA"
+
+Dallas Metro area locations 
+ [1] "2F7" "30F" "ADS" "AFW" "CVE" "DAL" "DFW" "DTO"
+ [9] "F46" "FTW" "FWS" "GKY" "GVT" "HQZ" "JWY" "LNC"
+[17] "NFW" "RBD" "TKI" "TRL" "TTT"
+
+Denver Metro area locations 
+[1] "APA" "BJC" "BKF" "DEN" "DVV" "LMO" "SPF"
+
+Detroit Metro area locations 
+ [1] "61MI" "D98"  "DET"  "DTW"  "DXO"  "MTC"  "ONZ" 
+ [8] "OZW"  "PSI"  "PTK"  "YIP" 
+
+Houston Metro area locations 
+ [1] "6R5" "CXO" "DAS" "DWH" "EFD" "GLS" "HOU" "HPY"
+ [9] "HUB" "IAH" "IWS" "LBX" "MHF" "SGR" "VUH"
+
+Indianapolis Metro area locations 
+[1] "AID" "EYE" "GFD" "IND" "TVX" "UMP" "VHP"
+
+Kansas City Metro area locations 
+[1] "ANX" "FLV" "IXD" "K34" "LXT" "MCI" "MKC" "OJC"
+
+Las Vegas Metro area locations 
+[1] "BLD" "BVU" "HND" "LAS" "LAX" "LSV" "VGT"
+
+Los Angeles Metro area locations 
+ [1] "74L"  "83CA" "98L"  "AVE"  "BUR"  "CA50" "ELB" 
+ [8] "EMT"  "FUL"  "GMN"  "LAX"  "LGB"  "MTJ"  "PMD" 
+[15] "POC"  "POM"  "SBD"  "SLI"  "SMO"  "SNA"  "TOA" 
+[22] "VNY"  "VTU"  "WHP"  "WJF" 
+
+Louisville Metro area locations 
+[1] "1II4" "4KY8" "ABB"  "IIU"  "IKY"  "JVY"  "LOU" 
+[8] "SDF" 
+
+Memphis Metro area locations 
+[1] "M65"  "MEM"  "TN47"
+
+Miami Metro area locations 
+ [1] "2FL1" "BCT"  "DHP"  "FLL"  "FXE"  "HWO"  "MIA" 
+ [8] "OPF"  "PBI"  "PMP"  "PSP"  "TMB" 
+
+Milwaukee Metro area locations 
+[1] "BAE" "MKE"
+
+Minneapolis Metro area locations 
+ [1] "12Y"  "ANE"  "CBG"  "FCM"  "FGT"  "GEP"  "LVN" 
+ [8] "MGG"  "MN45" "MSP"  "PNM"  "RNH"  "STP" 
+
+Nashville Metro area locations 
+[1] "4M7" "BNA" "M02" "MBT" "MQY"
+
+New York Metro area locations 
+ [1] "39N"  "3N6"  "6NY5" "7NJ6" "BBN"  "BLM"  "BWZ" 
+ [8] "CAT"  "CCC"  "CDW"  "CMK"  "COL"  "CRI"  "DPK" 
+[15] "EWR"  "FOK"  "FRG"  "HPN"  "HTO"  "HWV"  "ISP" 
+[22] "JFK"  "JRB"  "KHTO" "LDJ"  "LGA"  "MJX"  "MMU" 
+[29] "N07"  "N12"  "N51"  "N72"  "NEL"  "NOP"  "NYC" 
+[36] "POU"  "PWL"  "RAX"  "SAX"  "SBJ"  "SMQ"  "SWF" 
+[43] "TEB" 
+
+Orlando Metro area locations 
+[1] "2FA8" "ISM"  "LEE"  "MCO"  "OMN"  "ORL"  "SFB" 
+[8] "X04"  "X55" 
+
+Philadelphia Metro area locations 
+ [1] "4NJ7" "ARD"  "ILG"  "MXE"  "N14"  "N47"  "N57" 
+ [8] "NJ20" "OQN"  "PHL"  "PNE"  "PTW"  "RDG"  "UNV" 
+[15] "VAY"  "VCN"  "WRI" 
+
+Phoenix Metro area locations 
+ [1] "BXK" "CGZ" "CHD" "DVT" "FFZ" "GEU" "GYR" "IWA"
+ [9] "LUF" "PHX" "PXN" "PXR" "SDL"
+
+Pittsburgh Metro area locations 
+[1] "4G0" "AGC" "IHD" "MMJ" "PIT"
+
+Portland Metro area locations 
+ [1] "17S"  "2S6"  "56OR" "BTG"  "HIO"  "MMV"  "OG20"
+ [8] "P80"  "PDX"  "TTD"  "UBG"  "VUO"  "W52"  "W58" 
+
+Providence Metro area locations 
+[1] "BOS" "PVD" "SFZ" "TAN" "UUU" "WST"
+
+Riverside Metro area locations 
+ [1] "AJO" "APV" "BLH" "BNG" "CNO" "DAG" "EED" "HDF"
+ [9] "HEC" "HMT" "L35" "L65" "L67" "ONT" "PDZ" "POM"
+[17] "PSP" "RAL" "RBK" "REI" "RIR" "RIV" "SBD" "TNP"
+[25] "TRM" "UDD" "VCV"
+
+Sacramento Metro area locations 
+ [1] "AUN" "BLU" "EDU" "LHM" "MCC" "MHR" "MYV" "NCT"
+ [9] "O41" "SAC" "SMF" "STO" "TVL"
+
+Saint Louis Metro area locations 
+[1] "ALN" "CPS" "CSX" "ELX" "FTZ" "SET" "STL" "SUS"
+
+Salt Lake City Metro area locations 
+[1] "SJC" "SLC" "TCH" "TVY" "U42"
+
+San Antonio Metro area locations 
+[1] "BAZ" "HYI" "SAT"
+
+San Diego Metro area locations 
+ [1] "CRQ" "JLI" "MZB" "NKX" "NZY" "OCN" "OKB" "PGY"
+ [9] "RNM" "SAN" "SDM" "SEE"
+
+San Francisco Metro area locations 
+ [1] "CA35" "CCR"  "DVO"  "HAF"  "HWD"  "JMC"  "LVK" 
+ [8] "OAK"  "OSI"  "PYE"  "SAU"  "SFO"  "SQL" 
+
+San Jose Metro area locations 
+[1] "NUQ" "PAO" "RHV" "SJC"
+
+San Juan Metro area locations 
+[1] "JIG" "SAN" "SIG" "SJC" "SJU"
+
+Seattle Metro area locations 
+[1] "3WA8" "BFI"  "PAE"  "PLU"  "RNT"  "S46"  "SEA" 
+[8] "TCM"  "TIW" 
+
+Tampa Metro area locations 
+[1] "CLW" "MCF" "PCM" "PIE" "SPG" "TPA"
+
+Virginia Beach Metro area locations 
+[1] "LFI" "NGU" "NTU" "ORF" "PVG"
+
+Washington_DC Metro area locations 
+ [1] "ADW"  "AML"  "BRV"  "CGS"  "CSN"  "DAA"  "DCA" 
+ [8] "EZF"  "FDK"  "GAI"  "HEF"  "IAD"  "JYO"  "LDN" 
+[15] "RMN"  "W00"  "W18"  "W50"  "WV21"
+
+
+[1] "List of metropolitan areas with laser encounter totals and encounter rate calculations"
+
+[1] "Metro areas ordered by metro area name"
+       Metro_area Events Rate_per_100K
+45         All_US  22483         18.14
+1       Anchorage     19          1.99
+2         Atlanta    368          5.40
+3          Austin    194         14.81
+4       Baltimore    209         11.04
+5          Boston    207          8.41
+6       Charlotte    244          7.16
+7         Chicago    745         10.81
+8      Cincinnati    129         17.56
+9       Cleveland     75         12.49
+10       Columbus     78         13.29
+11         Dallas    531          9.58
+12         Denver    426         10.64
+13        Detroit    233         10.14
+14        Houston    674         17.89
+15   Indianapolis    308         31.22
+16    Kansas City    127         13.26
+17      Las Vegas    580          7.18
+18    Los Angeles   1694         26.52
+19     Louisville    323         34.19
+20        Memphis    178         11.15
+21          Miami    755         13.79
+22      Milwaukee     44          7.55
+23    Minneapolis    265          9.91
+24      Nashville    178         18.15
+25       New York    982         10.91
+26        Orlando    370         13.58
+27   Philadelphia    364         16.52
+28        Phoenix    921         27.34
+29     Pittsburgh    116         15.09
+30       Portland    592         40.10
+31     Providence     67          2.42
+32      Riverside    532         81.02
+33     Sacramento    158         18.76
+34    Saint Louis    117         10.20
+35 Salt Lake City    361         13.98
+36    San Antonio    228         27.36
+37      San Diego    571         38.37
+38  San Francisco    809         19.47
+39       San Jose    530         60.63
+40       San Juan    418         13.94
+41        Seattle    525         16.21
+42          Tampa    196         13.69
+43 Virginia Beach     29         10.62
+44  Washington_DC    273          7.92
+
+[1] "Metro areas ordered by laser encounter totals"
+       Metro_area Events Rate_per_100K
+45         All_US  22483         18.14
+18    Los Angeles   1694         26.52
+25       New York    982         10.91
+28        Phoenix    921         27.34
+38  San Francisco    809         19.47
+21          Miami    755         13.79
+7         Chicago    745         10.81
+14        Houston    674         17.89
+30       Portland    592         40.10
+17      Las Vegas    580          7.18
+37      San Diego    571         38.37
+32      Riverside    532         81.02
+11         Dallas    531          9.58
+39       San Jose    530         60.63
+41        Seattle    525         16.21
+12         Denver    426         10.64
+40       San Juan    418         13.94
+26        Orlando    370         13.58
+2         Atlanta    368          5.40
+27   Philadelphia    364         16.52
+35 Salt Lake City    361         13.98
+19     Louisville    323         34.19
+15   Indianapolis    308         31.22
+44  Washington_DC    273          7.92
+23    Minneapolis    265          9.91
+6       Charlotte    244          7.16
+13        Detroit    233         10.14
+36    San Antonio    228         27.36
+4       Baltimore    209         11.04
+5          Boston    207          8.41
+42          Tampa    196         13.69
+3          Austin    194         14.81
+20        Memphis    178         11.15
+24      Nashville    178         18.15
+33     Sacramento    158         18.76
+8      Cincinnati    129         17.56
+16    Kansas City    127         13.26
+34    Saint Louis    117         10.20
+29     Pittsburgh    116         15.09
+10       Columbus     78         13.29
+9       Cleveland     75         12.49
+31     Providence     67          2.42
+22      Milwaukee     44          7.55
+43 Virginia Beach     29         10.62
+1       Anchorage     19          1.99
+
+[1] "Metro areas ordered by laser encounter rate"
+       Metro_area Events Rate_per_100K
+32      Riverside    532         81.02
+39       San Jose    530         60.63
+30       Portland    592         40.10
+37      San Diego    571         38.37
+19     Louisville    323         34.19
+15   Indianapolis    308         31.22
+36    San Antonio    228         27.36
+28        Phoenix    921         27.34
+18    Los Angeles   1694         26.52
+38  San Francisco    809         19.47
+33     Sacramento    158         18.76
+24      Nashville    178         18.15
+45         All_US  22483         18.14
+14        Houston    674         17.89
+8      Cincinnati    129         17.56
+27   Philadelphia    364         16.52
+41        Seattle    525         16.21
+29     Pittsburgh    116         15.09
+3          Austin    194         14.81
+35 Salt Lake City    361         13.98
+40       San Juan    418         13.94
+21          Miami    755         13.79
+42          Tampa    196         13.69
+26        Orlando    370         13.58
+10       Columbus     78         13.29
+16    Kansas City    127         13.26
+9       Cleveland     75         12.49
+20        Memphis    178         11.15
+4       Baltimore    209         11.04
+25       New York    982         10.91
+7         Chicago    745         10.81
+12         Denver    426         10.64
+43 Virginia Beach     29         10.62
+34    Saint Louis    117         10.20
+13        Detroit    233         10.14
+23    Minneapolis    265          9.91
+11         Dallas    531          9.58
+5          Boston    207          8.41
+44  Washington_DC    273          7.92
+22      Milwaukee     44          7.55
+17      Las Vegas    580          7.18
+6       Charlotte    244          7.16
+2         Atlanta    368          5.40
+31     Providence     67          2.42
+1       Anchorage     19          1.99
+
+[1] "The reviewed MSAs covered territory in the following states and territories:"
+ [1] "Alaska"               "Arizona"             
+ [3] "California"           "Colorado"            
+ [5] "Connecticut"          "Delaware"            
+ [7] "District of Columbia" "Florida"             
+ [9] "Georgia"              "Illinois"            
+[11] "Indiana"              "Kansas"              
+[13] "Kentucky"             "Maryland"            
+[15] "Massachusetts"        "Michigan"            
+[17] "Minnesota"            "Missouri"            
+[19] "Nevada"               "New Hampshire"       
+[21] "New Jersey"           "New York"            
+[23] "North Carolina"       "Ohio"                
+[25] "Oregon"               "Pennsylvania"        
+[27] "Puerto Rico"          "Rhode Island"        
+[29] "Tennessee"            "Texas"               
+[31] "Utah"                 "Virginia"            
+[33] "Washington"           "West Virginia"       
+[35] "Wisconsin"           
+
+[1] "The following are the abbreviations of the states and territories that did not include any of the reviewed MSAs:"
+ [1] "AL" "AR" "GU" "HI" "IA" "ID" "LA" "ME" "MP" "MS"
+[11] "MT" "ND" "NE" "NM" "OK" "SC" "SD" "VI" "VT" "WY"
+
+[1] "The MSAs did not include territory in any of the following states and territories"
+ [1] "Alabama"                 
+ [2] "Arkansas"                
+ [3] "Guam"                    
+ [4] "Hawaii"                  
+ [5] "Idaho"                   
+ [6] "Iowa"                    
+ [7] "Louisiana"               
+ [8] "Maine"                   
+ [9] "Mississippi"             
+[10] "Montana"                 
+[11] "Nebraska"                
+[12] "New Mexico"              
+[13] "North Dakota"            
+[14] "Northern Mariana Islands"
+[15] "Oklahoma"                
+[16] "South Carolina"          
+[17] "South Dakota"            
+[18] "Vermont"                 
+[19] "Virgin Islands"          
+[20] "Wyoming"                 
+
+[1] "The states and territories that were not a part of any MSA were responsible for 6.9% of all air carrier traffic"
+
+[1] "The air carrier traffic in reviewed MSAs represented 85.1% of all US air carrier traffic."
+
+[1] "The air carrier traffic outside MSAs represented 14.9% of all US air carrier traffic."
+
+[1] "The laser events in the reviewed MSAs represented 74.5% of all US air carrier laser encounters."
+
+[1] "The laser events outside the MSAs represented 25.5% of all US air carrier laser encounters."
+
+[1] "The air carrier traffic in territories not a part of any reviewed MSA represented 6.9% of all US air carrier flights."
+
+[1] "The air carrier traffic in territories not a part of any reviewed MSA represented % of all US air carrier laser encounters."
+
+[1] "The percent of air carrier traffic not in one of these two areas represents -0.6% of all US air carrier flights."
+
+[1] "The percent of laser encounters involving air carrier flights outside of these same two areas represents 18.1% of all US air carrier laser encounters."
+
+[1] "Combination of MSAs and states with no included MSAs"
+              Area Events   Flights  Rate
+32       Riverside    532    656637 81.02
+39        San Jose    530    874226 60.63
+30        Portland    592   1476409 40.10
+37       San Diego    571   1488162 38.37
+281    Mississippi     48    127277 37.71
+210        Alabama    148    416932 35.50
+19      Louisville    323    944739 34.19
+15    Indianapolis    308    986474 31.22
+351     New Mexico    159    523111 30.40
+141           Iowa     88    294967 29.83
+36     San Antonio    228    833392 27.36
+28         Phoenix    921   3368639 27.34
+441 South Carolina    171    641295 26.66
+18     Los Angeles   1694   6388176 26.52
+391       Oklahoma    157    671509 23.38
+310       Arkansas     68    303361 22.42
+151          Idaho     89    401793 22.15
+38   San Francisco    809   4154909 19.47
+33      Sacramento    158    842017 18.76
+24       Nashville    178    980626 18.15
+45          All_US  22483 123972735 18.14
+14         Houston    674   3767755 17.89
+8       Cincinnati    129    734790 17.56
+131         Hawaii    404   2437484 16.57
+27    Philadelphia    364   2203649 16.52
+41         Seattle    525   3238263 16.21
+451   South Dakota     17    106455 15.97
+29      Pittsburgh    116    768673 15.09
+201      Louisiana    154   1024996 15.02
+3           Austin    194   1310035 14.81
+35  Salt Lake City    361   2581908 13.98
+40        San Juan    418   2999624 13.94
+21           Miami    755   5473927 13.79
+42           Tampa    196   1431852 13.69
+26         Orlando    370   2723988 13.58
+10        Columbus     78    586785 13.29
+16     Kansas City    127    957481 13.26
+311   North Dakota     16    126005 12.70
+321       Nebraska     53    417388 12.70
+9        Cleveland     75    600692 12.49
+51         Vermont     14    112766 12.42
+291        Montana     39    323963 12.04
+231          Maine     25    209259 11.95
+20         Memphis    178   1596029 11.15
+4        Baltimore    209   1892985 11.04
+25        New York    982   8998929 10.91
+7          Chicago    745   6889337 10.81
+12          Denver    426   4002331 10.64
+43  Virginia Beach     29    273113 10.62
+34     Saint Louis    117   1146683 10.20
+13         Detroit    233   2298097 10.14
+23     Minneapolis    265   2673499  9.91
+11          Dallas    531   5543914  9.58
+55         Wyoming      7     75875  9.23
+5           Boston    207   2460021  8.41
+44   Washington_DC    273   3446140  7.92
+22       Milwaukee     44    582827  7.55
+17       Las Vegas    580   8081954  7.18
+6        Charlotte    244   3406102  7.16
+121           Guam     14    200493  6.98
+2          Atlanta    368   6810651  5.40
+31      Providence     67   2768931  2.42
+1        Anchorage     19    954461  1.99
+50  Virgin Islands      1    104331  0.96
+
+[1] "Of the  22,483  events, all but 9 had their flight IDs analyzed."
+
+
+ Airline Events Weekly rate
+     SWA   4246        9.05
+     AAL   2278        4.85
+     DAL   2260        4.81
+     UAL   2087        4.45
+     SKW   1132        2.41
+     ASA   1042        2.22
+     JBU    984        2.10
+     UPS    969        2.06
+     FDX    929        1.98
+     RPA    657        1.40
+     NKS    483        1.03
+     AWE    474        1.01
+     ASH    393        0.84
+     CPZ    371        0.79
+     QXE    330        0.70
+     FFT    287        0.61
+     AAY    276        0.59
+     HAL    247        0.53
+     TRS    233        0.50
+     TCF    216        0.46
+[1] "The top 10 airlines in reported events per week were:"
+
+ SWA  AAL  DAL  UAL  SKW  ASA  JBU  UPS  FDX  RPA 
+9.05 4.85 4.81 4.45 2.41 2.22 2.10 2.06 1.98 1.40 
+
+[1] "Based on the traffic from these airlines, additional MSAs may be added."
+
+[1] "From the top ten airlines, additional MSAs include Anchorage, Louisville, Memphis, and Salt Lake City"
+
+[1] "Table summarizing the prevalence of capitalized location names or parts of location names."
+cap_cities
+AFB DFW VOR 
+  2 222   2 
+
+[1] "All dates properly formatted"
+
+[1] "===Summaries of key all data from factor and numeric features==="
+
+[1] "Range of dates"
+[1] "2010-01-01" "2018-12-31"
+
+[1] "Date summary"
+        Min.      1st Qu.       Median         Mean 
+"2010-01-01" "2013-06-26" "2015-10-28" "2015-05-08" 
+     3rd Qu.         Max. 
+"2017-04-27" "2018-12-31" 
+
+
+2010 2011 2012 2013 2014 2015 2016 2017 2018 
+1362 1706 1665 1911 1802 3640 3749 3569 3079 
+
+[1] "Table of events by month"
+
+ Jan  Feb  Mar  Apr  May  Jun  Jul  Aug  Sep  Oct  Nov 
+1705 1393 1818 1636 1615 1679 1958 2019 2056 2169 2211 
+ Dec 
+2224 
+
+[1] "Table of events by weekday"
+
+ Sun  Mon  Tue  Wed  Thu  Fri  Sat 
+3064 3015 3105 2945 3091 3418 3845 
+
+[1] "Table of events by hour (GMT)"
+
+   1    2    3    4    5    6    7    8    9   10   11 
+1512 2916 3781 4088 3580 2529 1471  732  362  246  177 
+  12   13   14   15   16   17   18   19   20   21   22 
+ 141  103   61   21   18   10    7    6    6    7   21 
+  23   24 
+ 109  579 
+
+[1] "Sorted table of aircraft models"
+
+B737 A320 B738 E170 B752 A319 CRJ7 B739 CRJ9 E175 A321 
+5137 2013 1948 1121 1111 1056 1005  824  789  756  634 
+B717 A306 B763 DH8D 
+ 607  432  418  413 
+
+[1] "Sorted table of Aircraft_Type category"
+
+    1     2     3     4 
+15650  2274  4067   492 
+
+[1] "Table of events by weekday"
+
+ Sun  Mon  Tue  Wed  Thu  Fri  Sat 
+3064 3015 3105 2945 3091 3418 3845 
+
+[1] "Table of injuries"
+
+   No   Yes  <NA> 
+22424    51     8 
+
+[1] "Sorted table of top 100 locations"
+
+ LAX  PHX  LAS  PDX  SAN  SJC  SEA  ORD  SJU  IAH  DEN 
+1063  843  560  546  502  496  480  460  414  396  382 
+ SFO  SLC  ATL  LGA  OAK  MIA  FLL  SDF  ONT  MCO  IND 
+ 356  353  351  349  331  323  304  299  288  282  281 
+ DFW  PHL  CLT  HOU  MSP  SAT  DTW  EWR  HNL  BOS  LEX 
+ 275  263  240  236  236  221  212  211  199  185  183 
+ JFK  AUS  MEM  SNA  BNA  ELP  BWI  TUS  MDW  OGG  ABQ 
+ 182  179  177  175  173  159  155  144  139  135  131 
+ TPA  CVG  DCA  STL  MCI  SMF  DAL  BUR  MSY  PIT  SLI 
+ 127  116  111  105  104  100   99   97   94   93   87 
+ RNO  IAD  BOI  MYR  PBI  FAT  MFE  CMH  RDU  SNS  TEB 
+  84   80   76   75   74   72   72   70   70   70   70 
+ MOD  SMO  PSP  CLE  TUL  LGB  BDL  PVD  OKC  PIE  DVK 
+  67   66   64   63   63   62   61   61   60   59   58 
+ DSM  ABE  BHM  HSV  GEG  SBD  VNY  ALB  JAX  MKE  STS 
+  55   53   53   53   52   51   48   47   45   45   45 
+ DAB  HWD  OMA  RSW  BUF  JOT  DAY  BFL  ROC  ADS  GSO 
+  44   44   44   44   43   43   41   40   40   38   38 
+ POM 
+  38 
+
+[1] "The raw data contained 47,448 records, but 24,965 of these records were eliminated from analysis due for various reasons, including duplications, missing data, or being out of the date range of interest 22,483 were analyzed"
+
+[1] "In the period from 2010-01-01 to 2018-12-31, there were 22,483 reported encounters where a laser beam affected one or more aircraft at or near 1,281 unique airports or other locations."
+
+[1] "During this period, there was an average of 6.84 laser encounters per day, with as many as 33 strikes in a single day. There were only 58 days during this 3,287-day period with no reported laser strikes on aircraft in the United States"
+
+[1] "In other words, during this period, on any given day in the United States, there was a 98.2% chance that at least one aircraft reported a potentially dangerous encounter with a laser beam."
+
+[1] "The dates before and after the gap and the size of the gap"
+ [1] "2010-01-01 2010-01-03 1"
+ [2] "2010-01-25 2010-01-27 1"
+ [3] "2010-02-05 2010-02-08 2"
+ [4] "2010-02-19 2010-02-21 1"
+ [5] "2010-02-21 2010-02-23 1"
+ [6] "2010-02-24 2010-02-26 1"
+ [7] "2010-03-02 2010-03-04 1"
+ [8] "2010-03-06 2010-03-08 1"
+ [9] "2010-03-16 2010-03-18 1"
+[10] "2010-04-29 2010-05-01 1"
+[11] "2010-05-31 2010-06-02 1"
+[12] "2010-06-06 2010-06-08 1"
+[13] "2010-06-28 2010-06-30 1"
+[14] "2010-08-17 2010-08-19 1"
+[15] "2010-11-07 2010-11-09 1"
+[16] "2010-11-21 2010-11-23 1"
+[17] "2010-11-23 2010-11-25 1"
+[18] "2010-11-25 2010-11-27 1"
+[19] "2010-12-15 2010-12-17 1"
+[20] "2010-12-18 2010-12-20 1"
+[21] "2010-12-27 2010-12-29 1"
+[22] "2011-01-03 2011-01-05 1"
+[23] "2011-01-17 2011-01-19 1"
+[24] "2011-02-21 2011-02-23 1"
+[25] "2011-02-28 2011-03-02 1"
+[26] "2011-03-27 2011-03-29 1"
+[27] "2011-03-30 2011-04-01 1"
+[28] "2011-04-15 2011-04-17 1"
+[29] "2011-06-13 2011-06-15 1"
+[30] "2011-07-19 2011-07-21 1"
+[31] "2011-11-15 2011-11-17 1"
+[32] "2012-01-31 2012-02-02 1"
+[33] "2012-02-25 2012-02-27 1"
+[34] "2012-04-22 2012-04-24 1"
+[35] "2012-04-30 2012-05-02 1"
+[36] "2012-05-24 2012-05-26 1"
+[37] "2012-05-31 2012-06-02 1"
+[38] "2012-06-14 2012-06-20 5"
+[39] "2012-10-27 2012-10-29 1"
+[40] "2013-06-12 2013-06-14 1"
+[41] "2013-09-06 2013-09-08 1"
+[42] "2014-01-16 2014-01-18 1"
+[43] "2014-01-30 2014-02-01 1"
+[44] "2014-02-08 2014-02-11 2"
+[45] "2014-03-26 2014-03-28 1"
+[46] "2014-04-01 2014-04-03 1"
+[47] "2014-04-09 2014-04-11 1"
+[48] "2014-05-26 2014-05-28 1"
+[49] "2014-12-04 2014-12-06 1"
+[50] "2014-12-18 2014-12-20 1"
+[51] "2015-02-21 2015-02-23 1"
+[52] "2016-06-07 2016-06-09 1"
+
+[1] "Table of daily strike frequencies."
+daily.strikes
+  0   1   2   3   4   5   6   7   8   9  10  11  12 
+ 58 146 240 313 360 351 314 265 251 236 170 141 101 
+ 13  14  15  16  17  18  19  20  21  22  23  24  25 
+ 84  65  63  34  17  15  18  14   9   6   7   4   2 
+ 27  29  33 
+  1   1   1 
+
+[1] "Summary of daily strike frequencies."
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    4.00    6.00    6.84    9.00   33.00 
+
+[1] "Table of daily strike by hour (UTC) of the day."
+
+   1    2    3    4    5    6    7    8    9   10   11 
+1512 2916 3781 4088 3580 2529 1471  732  362  246  177 
+  12   13   14   15   16   17   18   19   20   21   22 
+ 141  103   61   21   18   10    7    6    6    7   21 
+  23   24 
+ 109  579 
+
+[1] "Chi-square test to see if reports uniformly distributed throughout the week"
+
+	Chi-squared test for given probabilities
+
+data:  table(laserhits$Weekday)
+X-squared = 187.19, df = 6, p-value < 2.2e-16
+
+
+[1] "Table of reported laser encounters by month of the year"
+
+ Jan  Feb  Mar  Apr  May  Jun  Jul  Aug  Sep  Oct  Nov 
+1705 1393 1818 1636 1615 1679 1958 2019 2056 2169 2211 
+ Dec 
+2224 
+
+[1] "Table of reported laser encounters by month of the year"
+
+ Jan  Feb  Mar  Apr  May  Jun  Jul  Aug  Sep  Oct  Nov 
+1705 1393 1818 1636 1615 1679 1958 2019 2056 2169 2211 
+ Dec 
+2224 
+
+[1] "Chi-square test to see if reports uniformly distributed throughout the months of the year"
+
+	Chi-squared test for given probabilities
+
+data:  table(laserhits$Month)
+X-squared = 431.85, df = 11, p-value < 2.2e-16
+
+[1] "Table of reported laser encounters by month of the year and day of the week"
+     
+      Sun Mon Tue Wed Thu Fri Sat
+  Jan 259 289 201 207 226 244 279
+  Feb 184 201 180 165 179 228 256
+  Mar 224 213 261 219 249 326 326
+  Apr 227 221 217 209 234 261 267
+  May 222 209 207 224 224 235 294
+  Jun 191 221 243 226 229 275 294
+  Jul 244 251 293 290 245 296 339
+  Aug 271 278 288 274 295 282 331
+  Sep 288 272 293 255 262 323 363
+  Oct 283 270 315 306 292 318 385
+  Nov 354 301 305 285 330 288 348
+  Dec 317 289 302 285 326 342 363
+
+	Pearson's Chi-squared test
+
+data:  table(laserhits$Month, laserhits$Weekday)
+X-squared = 115.39, df = 66, p-value = 0.0001635
+
+
+[1] "List of states and territories ordered by name, number of air carrier operations, number of laser encounters, and rate of laser encounters"
+
+[1] "States ordered alphabetically by state name"
+
+                    State Operations (M) Events
+                  Alabama           0.42    148
+                   Alaska           1.19     30
+                  Arizona           3.69   1112
+                 Arkansas           0.30     68
+               California          14.68   4984
+                 Colorado           4.29    489
+              Connecticut           0.50    119
+                 Delaware           0.00     27
+     District of Columbia           1.90    109
+                  Florida          11.17   1615
+                  Georgia           7.01    466
+                     Guam           0.20     14
+                   Hawaii           2.44    404
+                    Idaho           0.40     89
+                 Illinois           6.97    746
+                  Indiana           1.07    477
+                     Iowa           0.29     88
+                   Kansas           0.15     55
+                 Kentucky           1.75    747
+                Louisiana           1.02    154
+                    Maine           0.21     25
+                 Maryland           1.90    241
+            Massachusetts           2.49    234
+                 Michigan           2.66    313
+                Minnesota           2.70    287
+              Mississippi           0.13     48
+                 Missouri           2.17    289
+                  Montana           0.32     39
+                 Nebraska           0.42     53
+                   Nevada           3.52    676
+            New Hampshire           0.21     34
+               New Jersey           2.80    477
+               New Mexico           0.52    159
+                 New York           7.38    796
+           North Carolina           4.57    397
+             North Dakota           0.13     16
+ Northern Mariana Islands           0.05      0
+                     Ohio           1.49    308
+                 Oklahoma           0.67    157
+                   Oregon           1.67    683
+             Pennsylvania           3.16    608
+              Puerto Rico           0.70    451
+             Rhode Island           0.31     65
+           South Carolina           0.64    171
+             South Dakota           0.11     17
+                Tennessee           2.74    441
+                    Texas          12.01   2021
+                     Utah           1.72    442
+                  Vermont           0.11     14
+           Virgin Islands           0.10      1
+                 Virginia           2.20    240
+               Washington           3.81    692
+            West Virginia           0.05     47
+                Wisconsin           0.80     93
+                  Wyoming           0.08      7
+ Rate per 100K
+         35.50
+          2.52
+         30.12
+         22.42
+         33.96
+         11.40
+         23.67
+        992.65
+          5.75
+         14.46
+          6.65
+          6.98
+         16.57
+         22.15
+         10.71
+         44.73
+         29.83
+         37.65
+         42.77
+         15.02
+         11.95
+         12.68
+          9.40
+         11.79
+         10.62
+         37.71
+         13.32
+         12.04
+         12.70
+         19.22
+         16.08
+         17.03
+         30.40
+         10.79
+          8.68
+         12.70
+          0.00
+         20.60
+         23.38
+         40.84
+         19.27
+         64.46
+         20.86
+         26.66
+         15.97
+         16.12
+         16.82
+         25.75
+         12.42
+          0.96
+         10.93
+         18.18
+         99.08
+         11.60
+          9.23
+
+[1] "States and territories ordered by air carrier operations"
+                    State Operations (M) Events
+               California          14.68   4984
+                    Texas          12.01   2021
+                  Florida          11.17   1615
+                 New York           7.38    796
+                  Georgia           7.01    466
+                 Illinois           6.97    746
+           North Carolina           4.57    397
+                 Colorado           4.29    489
+               Washington           3.81    692
+                  Arizona           3.69   1112
+                   Nevada           3.52    676
+             Pennsylvania           3.16    608
+               New Jersey           2.80    477
+                Tennessee           2.74    441
+                Minnesota           2.70    287
+                 Michigan           2.66    313
+            Massachusetts           2.49    234
+                   Hawaii           2.44    404
+                 Virginia           2.20    240
+                 Missouri           2.17    289
+     District of Columbia           1.90    109
+                 Maryland           1.90    241
+                 Kentucky           1.75    747
+                     Utah           1.72    442
+                   Oregon           1.67    683
+                     Ohio           1.49    308
+                   Alaska           1.19     30
+                  Indiana           1.07    477
+                Louisiana           1.02    154
+                Wisconsin           0.80     93
+              Puerto Rico           0.70    451
+                 Oklahoma           0.67    157
+           South Carolina           0.64    171
+               New Mexico           0.52    159
+              Connecticut           0.50    119
+                  Alabama           0.42    148
+                 Nebraska           0.42     53
+                    Idaho           0.40     89
+                  Montana           0.32     39
+             Rhode Island           0.31     65
+                 Arkansas           0.30     68
+                     Iowa           0.29     88
+                    Maine           0.21     25
+            New Hampshire           0.21     34
+                     Guam           0.20     14
+                   Kansas           0.15     55
+              Mississippi           0.13     48
+             North Dakota           0.13     16
+             South Dakota           0.11     17
+                  Vermont           0.11     14
+           Virgin Islands           0.10      1
+                  Wyoming           0.08      7
+ Northern Mariana Islands           0.05      0
+            West Virginia           0.05     47
+                 Delaware           0.00     27
+ Rate per 100K
+         33.96
+         16.82
+         14.46
+         10.79
+          6.65
+         10.71
+          8.68
+         11.40
+         18.18
+         30.12
+         19.22
+         19.27
+         17.03
+         16.12
+         10.62
+         11.79
+          9.40
+         16.57
+         10.93
+         13.32
+          5.75
+         12.68
+         42.77
+         25.75
+         40.84
+         20.60
+          2.52
+         44.73
+         15.02
+         11.60
+         64.46
+         23.38
+         26.66
+         30.40
+         23.67
+         35.50
+         12.70
+         22.15
+         12.04
+         20.86
+         22.42
+         29.83
+         11.95
+         16.08
+          6.98
+         37.65
+         37.71
+         12.70
+         15.97
+         12.42
+          0.96
+          9.23
+          0.00
+         99.08
+        992.65
+
+[1] "States and territories ordered by laser encounters"
+                    State Operations (M) Events
+               California          14.68   4984
+                    Texas          12.01   2021
+                  Florida          11.17   1615
+                  Arizona           3.69   1112
+                 New York           7.38    796
+                 Kentucky           1.75    747
+                 Illinois           6.97    746
+               Washington           3.81    692
+                   Oregon           1.67    683
+                   Nevada           3.52    676
+             Pennsylvania           3.16    608
+                 Colorado           4.29    489
+               New Jersey           2.80    477
+                  Indiana           1.07    477
+                  Georgia           7.01    466
+              Puerto Rico           0.70    451
+                     Utah           1.72    442
+                Tennessee           2.74    441
+                   Hawaii           2.44    404
+           North Carolina           4.57    397
+                 Michigan           2.66    313
+                     Ohio           1.49    308
+                 Missouri           2.17    289
+                Minnesota           2.70    287
+                 Maryland           1.90    241
+                 Virginia           2.20    240
+            Massachusetts           2.49    234
+           South Carolina           0.64    171
+               New Mexico           0.52    159
+                 Oklahoma           0.67    157
+                Louisiana           1.02    154
+                  Alabama           0.42    148
+              Connecticut           0.50    119
+     District of Columbia           1.90    109
+                Wisconsin           0.80     93
+                    Idaho           0.40     89
+                     Iowa           0.29     88
+                 Arkansas           0.30     68
+             Rhode Island           0.31     65
+                   Kansas           0.15     55
+                 Nebraska           0.42     53
+              Mississippi           0.13     48
+            West Virginia           0.05     47
+                  Montana           0.32     39
+            New Hampshire           0.21     34
+                   Alaska           1.19     30
+                 Delaware           0.00     27
+                    Maine           0.21     25
+             South Dakota           0.11     17
+             North Dakota           0.13     16
+                     Guam           0.20     14
+                  Vermont           0.11     14
+                  Wyoming           0.08      7
+           Virgin Islands           0.10      1
+ Northern Mariana Islands           0.05      0
+ Rate per 100K
+         33.96
+         16.82
+         14.46
+         30.12
+         10.79
+         42.77
+         10.71
+         18.18
+         40.84
+         19.22
+         19.27
+         11.40
+         17.03
+         44.73
+          6.65
+         64.46
+         25.75
+         16.12
+         16.57
+          8.68
+         11.79
+         20.60
+         13.32
+         10.62
+         12.68
+         10.93
+          9.40
+         26.66
+         30.40
+         23.38
+         15.02
+         35.50
+         23.67
+          5.75
+         11.60
+         22.15
+         29.83
+         22.42
+         20.86
+         37.65
+         12.70
+         37.71
+         99.08
+         12.04
+         16.08
+          2.52
+        992.65
+         11.95
+         15.97
+         12.70
+          6.98
+         12.42
+          9.23
+          0.96
+          0.00
+
+[1] "States and territories ordered by laser encounter rate"
+                    State Operations (M) Events
+                 Delaware           0.00     27
+            West Virginia           0.05     47
+              Puerto Rico           0.70    451
+                  Indiana           1.07    477
+                 Kentucky           1.75    747
+                   Oregon           1.67    683
+              Mississippi           0.13     48
+                   Kansas           0.15     55
+                  Alabama           0.42    148
+               California          14.68   4984
+               New Mexico           0.52    159
+                  Arizona           3.69   1112
+                     Iowa           0.29     88
+           South Carolina           0.64    171
+                     Utah           1.72    442
+              Connecticut           0.50    119
+                 Oklahoma           0.67    157
+                 Arkansas           0.30     68
+                    Idaho           0.40     89
+             Rhode Island           0.31     65
+                     Ohio           1.49    308
+             Pennsylvania           3.16    608
+                   Nevada           3.52    676
+               Washington           3.81    692
+               New Jersey           2.80    477
+                    Texas          12.01   2021
+                   Hawaii           2.44    404
+                Tennessee           2.74    441
+            New Hampshire           0.21     34
+             South Dakota           0.11     17
+                Louisiana           1.02    154
+                  Florida          11.17   1615
+                 Missouri           2.17    289
+                 Nebraska           0.42     53
+             North Dakota           0.13     16
+                 Maryland           1.90    241
+                  Vermont           0.11     14
+                  Montana           0.32     39
+                    Maine           0.21     25
+                 Michigan           2.66    313
+                Wisconsin           0.80     93
+                 Colorado           4.29    489
+                 Virginia           2.20    240
+                 New York           7.38    796
+                 Illinois           6.97    746
+                Minnesota           2.70    287
+            Massachusetts           2.49    234
+                  Wyoming           0.08      7
+           North Carolina           4.57    397
+                     Guam           0.20     14
+                  Georgia           7.01    466
+     District of Columbia           1.90    109
+                   Alaska           1.19     30
+           Virgin Islands           0.10      1
+ Northern Mariana Islands           0.05      0
+ Rate per 100K
+        992.65
+         99.08
+         64.46
+         44.73
+         42.77
+         40.84
+         37.71
+         37.65
+         35.50
+         33.96
+         30.40
+         30.12
+         29.83
+         26.66
+         25.75
+         23.67
+         23.38
+         22.42
+         22.15
+         20.86
+         20.60
+         19.27
+         19.22
+         18.18
+         17.03
+         16.82
+         16.57
+         16.12
+         16.08
+         15.97
+         15.02
+         14.46
+         13.32
+         12.70
+         12.70
+         12.68
+         12.42
+         12.04
+         11.95
+         11.79
+         11.60
+         11.40
+         10.93
+         10.79
+         10.71
+         10.62
+          9.40
+          9.23
+          8.68
+          6.98
+          6.65
+          5.75
+          2.52
+          0.96
+          0.00
+
+[1] "The state of Delaware stands out because of its very high rate of laser encounters. This is due to its relativley low number of air carrier operations."
+
+[1] "In the nine years of the study, Delaware had only 2,720 air carrier flight operations, or 0.83 flights per day."
+
+[1] "The next highest state or territory West Virginia had 47,438  air carrier flight operations, or 14.43  flights per day."
+
+[1] "The number of reported laser encounters in Delaware, was likely not due to air carrier operations within the state, but rather to Delaware's locaiton within an area of high air carrier activity in the northeast US. "
+
+[1] "Summary of reported laser hits by selected location in a state with a maximum of 10 locations listed per state."
+
+[1] "Note that these locations may places other than airports, such as heliports and navigational facilities."
+
+2 Alaska  (All reporting locations)        
+1 ANC 19
+2 ENA  3
+3 FAI  3
+4 BRW  1
+5 CYT  1
+6 FBK  1
+7 JNU  1
+8 SIT  1
+
+1 Alabama  (Top 10 locations)         
+1  BHM 53
+2  HSV 53
+3  GAD  6
+4  MOB  5
+5  DHN  4
+6  MGM  4
+7  TOI  3
+8  VUZ  3
+9  CMD  2
+10 TCL  2
+
+4 Arkansas  (Top 10 locations)         
+1  LIT 23
+2  FSM 15
+3  XNA  7
+4  JBR  3
+5  VBT  3
+6  DEQ  2
+7  7M4  1
+8  ARG  1
+9  ASG  1
+10 AWM  1
+
+3 Arizona  (Top 10 locations)          
+1  PHX 843
+2  TUS 144
+3  IWA  24
+4  NYL  16
+5  FFZ  10
+6  DVT   9
+7  CHD   7
+8  FLG   7
+9  GEU   6
+10 PRC   6
+
+5 California  (Top 10 locations)           
+1  LAX 1061
+2  SAN  501
+3  SJC  494
+4  SFO  356
+5  OAK  330
+6  ONT  288
+7  SNA  175
+8  SMF  100
+9  BUR   97
+10 SLI   87
+
+6 Colorado  (Top 10 locations)          
+1  DEN 382
+2  COS  24
+3  APA  19
+4  BJC  15
+5  GJT  10
+6  BKF   4
+7  FNL   4
+8  LMO   4
+9  PUB   4
+10 GXY   3
+
+7 Connecticut  (Top 10 locations)         
+1  BDL 61
+2  HFD 28
+3  BDR  6
+4  DXR  4
+5  GON  4
+6  HVN  4
+7  MAD  3
+8  MMK  2
+9  OXC  2
+10 4B9  1
+
+9 District of Columbia (All reporting locations)
+         
+1 DCA 109
+
+8 Delaware  (All reporting locations)        
+1 ILG 13
+2 DOV  7
+3 ENO  4
+4 38N  2
+5 ATR  1
+
+10 Florida  (Top 10 locations)          
+1  MIA 323
+2  FLL 304
+3  MCO 282
+4  TPA 127
+5  PBI  74
+6  PIE  59
+7  JAX  45
+8  DAB  44
+9  RSW  44
+10 ORL  35
+
+11 Georgia  (Top 10 locations)          
+1  ATL 349
+2  SAV  23
+3  RMG  11
+4  AGS   7
+5  CSG   7
+6  LZU   6
+7  MCN   6
+8  AHN   5
+9  ODF   5
+10 PDK   4
+
+12 Guam  (All reporting locations)        
+1 GUM 12
+2 UAM  1
+3 UNZ  1
+
+13 Hawaii  (Top 10 locations)           
+1   HNL 199
+2   OGG 135
+3   ITO  16
+4   KOA  13
+5   LIH  11
+6   HTO   4
+7   HCF   3
+8   MUE   3
+9  PHTO   3
+10  CKH   2
+
+17 Iowa  (Top 10 locations)         
+1  DSM 55
+2  CID 16
+3  IOW  4
+4  ALO  2
+5  SUX  2
+6  TVK  2
+7  CBF  1
+8  COL  1
+9  CSQ  1
+10 DBQ  1
+
+14 Idaho  (All reporting locations)        
+1 BOI 76
+2 LWS  4
+3 IDA  3
+4 1U7  1
+5 COE  1
+6 PIH  1
+7 SUN  1
+8 TNV  1
+9 TWF  1
+
+15 Illinois  (Top 10 locations)          
+1  ORD 460
+2  MDW 139
+3  JOT  43
+4  DPA  17
+5  RFD  11
+6  PIA  10
+7  ARR   9
+8  OBK   7
+9  LOT   5
+10 MLI   4
+
+16 Indiana  (Top 10 locations)          
+1  IND 281
+2  GYY  33
+3  VHP  20
+4  FWA  19
+5  HUF  10
+6  EVV   9
+7  SBN   8
+8  GSH   6
+9  BMG   5
+10 MIE   5
+
+18 Kansas  (Top 10 locations)         
+1  ICT 30
+2  MCI  4
+3  TOP  4
+4  IAB  3
+5  MHK  2
+6  62K  1
+7  CNU  1
+8  FLV  1
+9  GLD  1
+10 H97  1
+
+19 Kentucky  (Top 10 locations)          
+1  SDF 299
+2  LEX 183
+3  CVG  89
+4  DVK  58
+5  I53  16
+6  LOU  14
+7  LOZ  12
+8  SME  11
+9  HYK  10
+10 UXJ   6
+
+20 Louisiana  (Top 10 locations)          
+1   MSY 94
+2   BTR 14
+3   LFT 10
+4   MLU  6
+5   SHV  5
+6   AUR  3
+7  0LS7  2
+8   1L0  2
+9   ASD  2
+10  HDC  2
+
+23 Massachusetts  (Top 10 locations)          
+1  BOS 184
+2  BAF   7
+3  LWM   7
+4  ORH   7
+5  CEF   4
+6  GHG   4
+7  BED   3
+8  TAN   3
+9  BVY   2
+10 GDM   2
+
+22 Maryland  (Top 10 locations)          
+1  BWI 155
+2  BAL  29
+3  FDK  10
+4  ANP   7
+5  EMI   6
+6  ADW   5
+7  CGS   5
+8  GAI   5
+9  APG   3
+10 HGR   3
+
+21 Maine  (All reporting locations)        
+1 PWM 17
+2 BGR  4
+3 B19  2
+4 AUG  1
+5 PWN  1
+
+24 Michigan  (Top 10 locations)          
+1  DTW 212
+2  GRR  21
+3  AZO   9
+4  FNT   7
+5  DET   6
+6  LAN   6
+7  TVC   5
+8  JXN   4
+9  MBS   4
+10 PMM   4
+
+25 Minnesota  (Top 10 locations)           
+1   MSP 236
+2   FCM   9
+3   DLH   7
+4   RST   5
+5   FGT   4
+6   STP   4
+7   ANE   2
+8   FBL   2
+9  MN45   2
+10  PNM   2
+
+27 Missouri  (Top 10 locations)          
+1  STL 104
+2  MCI 100
+3  SGF  25
+4  MKC  14
+5  EOS   5
+6  JLN   4
+7  SUS   4
+8  ANX   3
+9  IRK   3
+10 LXT   3
+
+       
+1 00R 0
+
+26 Mississippi  (Top 10 locations)         
+1  GPT 18
+2  JAN  8
+3  HBG  2
+4  MCB  2
+5  MEI  2
+6  OLV  2
+7  GCV  1
+8  GTR  1
+9  HLI  1
+10 HSA  1
+
+28 Montana  (Top 10 locations)          
+1   BIL 11
+2   BZN 10
+3   GTF  4
+4   HLN  3
+5   MSO  3
+6   FCA  2
+7   GPI  2
+8   6S5  1
+9  MT95  1
+10  S27  1
+
+35 North Carolina  (Top 10 locations)          
+1  CLT 237
+2  RDU  70
+3  GSO  38
+4  AVL  13
+5  HKY   5
+6  ILM   5
+7  FAY   4
+8  INT   4
+9  JQF   4
+10 BZM   2
+
+36 North Dakota  (All reporting locations)       
+1 FAR 8
+2 BIS 6
+3 JMS 2
+
+29 Nebraska  (All reporting locations)        
+1 OMA 44
+2 GRI  4
+3 LNK  3
+4 AHQ  1
+5 ANW  1
+
+31 New Hampshire  (All reporting locations)        
+1 MHT 23
+2 EEN  4
+3 LEB  3
+4 PSM  2
+5 ASH  1
+6 CON  1
+
+32 New Jersey  (Top 10 locations)          
+1  EWR 211
+2  TEB  70
+3  ACY  29
+4  COL  17
+5  RBV  13
+6  TTN  13
+7  BWZ  12
+8  CDW  12
+9  MMU  12
+10 SAX  11
+
+33 New Mexico  (Top 10 locations)          
+1  ABQ 131
+2  SAF   6
+3  HOB   3
+4  LRU   3
+5  CNM   2
+6  SVC   2
+7  AEG   1
+8  ALM   1
+9  CVN   1
+10 DMN   1
+
+30 Nevada  (Top 10 locations)          
+1  LAS 560
+2  RNO  84
+3  BVU   5
+4  BLD   4
+5  HND   4
+6  FMG   3
+7  LSV   3
+8  VGT   3
+9  CXP   2
+10 LAX   2
+
+34 New York  (Top 10 locations)          
+1  LGA 349
+2  JFK 181
+3  ALB  47
+4  BUF  43
+5  ROC  40
+6  SYR  29
+7  HPN  20
+8  ISP  13
+9  SWF   8
+10 FRG   6
+
+38 Ohio  (Top 10 locations)         
+1  CMH 70
+2  CLE 63
+3  DAY 40
+4  CAK 31
+5  CVG 27
+6  LUK  6
+7  MFD  5
+8  TOL  5
+9  YNG  5
+10 CXR  4
+
+39 Oklahoma  (Top 10 locations)         
+1  TUL 63
+2  OKC 60
+3  BVO 10
+4  OKM  3
+5  GMJ  2
+6  GNP  2
+7  MLC  2
+8  OUN  2
+9  PWA  2
+10 SWO  2
+
+40 Oregon  (Top 10 locations)          
+1  PDX 545
+2  EUG  33
+3  MFR  24
+4  UBG  11
+5  RDM  10
+6  SLE   7
+7  TTD   7
+8  UAO   7
+9  PDT   5
+10 DLS   4
+
+41 Pennsylvania  (Top 10 locations)          
+1  PHL 263
+2  PIT  93
+3  ABE  53
+4  ARD  21
+5  AVP  19
+6  LNS  19
+7  AGC  17
+8  MXE  17
+9  PTW  14
+10 PNE  12
+
+42 Puerto Rico  (All reporting locations)          
+1  SJU 413
+2  BQN  22
+3  PSE   7
+4  ABO   2
+5  JIG   2
+6  JMZ   1
+7  MAZ   1
+8  SAN   1
+9  SIG   1
+10 SJC   1
+
+43 Rhode Island  (All reporting locations)        
+1 PVD 61
+2 BOS  1
+3 SFZ  1
+4 UUU  1
+5 WST  1
+
+44 South Carolina  (Top 10 locations)         
+1  MYR 75
+2  GSP 27
+3  CHS 26
+4  CAE 15
+5  SPA  5
+6  CLT  3
+7  FLO  3
+8  GRD  3
+9  AIK  2
+10 GMU  2
+
+45 South Dakota  (All reporting locations)        
+1 FSD 11
+2 RAP  4
+3 7G9  1
+4 BTN  1
+
+46 Tennessee  (Top 10 locations)          
+1  MEM 177
+2  BNA 173
+3  TYS  28
+4  CHA  24
+5  MKL   8
+6  TRI   4
+7  DYR   3
+8  FYE   2
+9  MBT   2
+10 MQY   2
+
+47 Texas  (Top 10 locations)          
+1  IAH 395
+2  DFW 275
+3  HOU 236
+4  SAT 221
+5  AUS 179
+6  ELP 158
+7  DAL  99
+8  MFE  71
+9  ADS  38
+10 MAF  29
+
+48 Utah  (Top 10 locations)          
+1  SLC 353
+2  PVU  33
+3  OGD  19
+4  FFU   9
+5  TCH   6
+6  VEL   3
+7  HVE   2
+8  LHO   2
+9  U42   2
+10 UTI   2
+
+51 Virginia  (Top 10 locations)         
+1  IAD 80
+2  RIC 28
+3  AML 26
+4  ORF 24
+5  ROA 14
+6  HEF 10
+7  CHO  9
+8  OKV  6
+9  JYO  5
+10 LYH  4
+
+50 Virgin Islands (All reporting locations)
+        
+1 TISX 1
+
+49 Vermont  (All reporting locations)        
+1 BTV 12
+2 MVL  1
+3 VSF  1
+
+52 Washington  (Top 10 locations)          
+1  SEA 480
+2  GEG  52
+3  PAE  28
+4  PSC  17
+5  BTG  15
+6  YKM  14
+7  EAT  12
+8  OLM  12
+9  BLI  10
+10 ALW   9
+
+54 Wisconsin  (Top 10 locations)         
+1  MKE 45
+2  JVL 15
+3  GRB  8
+4  MSN  8
+5  ATW  4
+6  BUU  3
+7  MWC  2
+8  ARV  1
+9  BAE  1
+10 ENW  1
+
+53 West Virginia  (Top 10 locations)         
+1  MRB 17
+2  CRW  8
+3  EKN  3
+4  HLG  3
+5  BLF  2
+6  ESL  2
+7  HTS  2
+8  LWB  2
+9  PKB  2
+10 CKB  1
+
+55 Wyoming  (All reporting locations)       
+1 CYS 2
+2 RKS 2
+3 JAC 1
+4 LND 1
+5 TOR 1
+
+
+[1] "Table of reported laser encounters by hour of the day and day of the week"
+    
+     Sun Mon Tue Wed Thu Fri Sat
+  1  238 238 199 206 191 209 231
+  2  439 402 381 382 396 430 486
+  3  553 501 492 470 526 580 659
+  4  541 553 562 483 592 654 703
+  5  458 488 518 521 455 517 623
+  6  318 307 340 362 365 384 453
+  7  174 202 241 176 191 231 256
+  8   96  89  96  89  84 123 155
+  9   50  48  53  41  59  58  53
+  10  18  32  41  34  35  49  37
+  11  14  11  18  37  36  32  29
+  12  10  11  34  31  16  21  18
+  13   5  12  20  14  15  24  13
+  14   4   4   9  11  13  11   9
+  15   2   4   3   3   6   1   2
+  16   2   3   3   4   3   1   2
+  17   2   3   1   2   1   1   0
+  18   1   0   1   1   0   2   2
+  19   0   4   0   1   0   0   1
+  20   1   0   2   0   0   0   3
+  21   0   2   1   0   2   1   1
+  22   4   5   2   1   4   3   2
+  23  19  13  10  15  16  17  19
+  24 115  83  78  61  85  69  88
+
+[1] "Table of reported laser encounters by hour of the day and month of the year"
+    
+     Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+  1  152 117 117  90  44  17  23  73 177 239 230 233
+  2  200 181 216 215 171 150 166 270 337 330 344 336
+  3  290 272 325 272 277 276 330 323 359 429 316 312
+  4  268 220 356 315 330 381 407 408 395 373 320 315
+  5  229 177 285 326 328 320 401 369 307 277 305 256
+  6  198 168 203 194 236 233 262 238 196 159 213 229
+  7  133 105 136  90  93 149 187 129 107  72 134 136
+  8   54  48  63  51  47  67  82  76  52  42  78  72
+  9   18  20  30  26  38  36  32  45  18  29  34  36
+  10  14  11  16  11  22  16  29  31  28  25  22  21
+  11  18  10  20  10   8   5  13  21  13  21  16  22
+  12  13  10   7   7   5   4   3  15   9  16  17  35
+  13   6   7  10   8   4   5   4   6  15   6  10  22
+  14   7   4   5   1   1   5   0   3   5  13   7  10
+  15   7   0   1   1   1   0   0   0   0   0   2   9
+  16   3   1   0   2   1   1   2   0   2   1   3   2
+  17   2   0   1   0   1   2   0   0   0   1   1   2
+  18   2   0   0   0   0   1   0   0   0   0   1   3
+  19   0   1   0   0   0   2   0   0   0   0   2   1
+  20   0   2   0   0   0   1   1   1   0   1   0   0
+  21   0   0   1   1   0   0   1   0   1   0   0   3
+  22   0   2   3   1   2   1   4   1   0   0   1   6
+  23  10   1   1   5   2   2   1   3   2  12  28  42
+  24  81  36  22  10   4   5  10   7  33 123 127 121
+
+[1] "There were a total of 22,483 reports, with 22,322 of these also containing color information."
+
+[1] "98.85%, or 22,066 of these events involved the five most frequently reported colors."
+
+
+Processing end date and time
+Fri Nov 29 17:15:05 2019
+
+[1] "Total processing time = 23.78 seconds"
