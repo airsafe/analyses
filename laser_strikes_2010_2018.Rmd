@@ -1358,6 +1358,6 @@ Air Traffic Activity System (FAA) https://aspm.faa.gov/opsnet/sys/Airport.asp
 Patterns of laser strikes on US aircraft: 2010 to 2018 (this report)
 
 * HTML - http://www.airsafe.com/analyze/laser_strikes_2010_2018.html
-* Rmd - http://www.airsafe.com/analyze/laser_strikes_2010_2018.Rmd
-* R code - http://www.airsafe.com/analyze/laser_strikes_2010_2018.R
+* Rmd - https://github.com/airsafe/analyses/blob/master/laser_strikes_2010_2018.Rmd
+* R code - https://github.com/airsafe/analyses/blob/master/laser_strikes_2010_2018.R
 
