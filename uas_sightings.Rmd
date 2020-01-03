@@ -1,0 +1,891 @@
+---
+title: 'FAA UAS Sightings Database 2015-2018 Overview'
+author: "Todd Curtis"
+date: "January 1, 2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+```
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# === Created 24 December 2019 ===
+
+# Data files located at FAA page "UAS Sightings Reports" at 
+# https://www.faa.gov/uas/resources/public_records/uas_sightings_report/
+
+# Original data converted to a CSV file and can be downloaded from AirSafe.com 
+# http://www.airsafe.com/analyze/uas_events.csv
+
+# sUAS registrations from FOIA Library: Geographic listing of hobbyist/non-hobbyist sUAS registry enrollments and registrants 
+# https://www.faa.gov/foia/electronic_reading_room/#geo_list, file 
+# https://www.faa.gov/foia/electronic_reading_room/media/Registrations-City-State-Country-Count-2019Q3Q4.xlsx 
+# 
+
+# Operational data on flights taken from the FAA Operations Network (OPSNET)
+#       site at https://aspm.faa.gov/opsnet/sys/airport.asp
+
+# Raw data included are all 50 states, the District of Columbia, and Puerto Rico, and several US territories.
+
+
+# Raw data included are all 50 states, the District of Columbia, and Puerto Rico, and several US territories.
+
+
+# ====== FUNCTIONS ===========
+# The following functions are defined for this analysis
+
+# No customized functions
+
+# ==== END OF FUNCTIONS ====
+
+# DATA CLEANING: Pre-processing corrections
+# The raw data file from the FAA contained numerious cases of incorrect
+# data with respect to location (city, and state), including misspellings and capitatlization errors,
+# as well as missing data. The events were manually reviewed to correct these errors when sufficient 
+# information was contained in the rest of the record.
+
+# Also, the city may have had an airport name instead of a city name.
+# Depending on the informaiton that record, for clarity, the most appropriate option, or the name of the 
+#    airport name or city name was kept to determine the location # Missing airport codes that could not be determined, or events en route, were coded as 'UNKN'
+# States and cities that could not be determined were  coded as 'UNK'.
+
+# City names with city abbreviations like Ft. or St. had those abbreviations spelled out.
+# City names that were an air force base or naval air station kept the AFB or NAS abbreviation.
+
+# Resources for state and city identifiers included:
+#       - Google Maps
+#       - AirNav.com - https://www.airnav.com/airports/
+
+
+# Initial goal is to input data and do basic summary statistics
+
+# === DATA DESCRIPTION  ====
+# There are two files: 
+#       1. UAS sightings reports (8,615 rows)
+#       2. Summary of hobbyist and non-hobbyist UAS registrations (one per owner)
+# === END DATA DESCRIPTION  ====
+
+
+# First, ensure we have the packages we need
+
+# ===PACKAGES===
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+if("downloader" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("downloader")}
+library(downloader) 
+
+if("stringr" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("stringr")}
+library(stringr)
+
+# Now for the heat maps using US states outline
+# Load the necessry packages
+
+# For map-related data displays that used as inspiration
+# the example at http://docs.ggplot2.org/0.9.3.1/map_data.html
+
+if("maps" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("maps")}
+library(maps)
+
+if("ggplot2" %in% rownames(installed.packages()) == FALSE) 
+{install.packages("ggplot2")}
+library(ggplot2)
+
+
+# === END PACKAGES ===
+
+# === DATA CLEANING ===
+# Pre-processing corrections
+# The raw data file from the FAA contained numerious cases of incorrect
+# data with respect to location (city, and state), including misspellings and capitatlization errors,
+# as well as missing data. The events were manually reviewed to correct these errors when sufficient 
+# information was contained in the rest of the record.
+
+# Also, the city may have had an airport name instead of a city name.
+# Depending on the informaiton that record, for clarity, the most appropriate option, or the name of the 
+#    airport name or city name was kept to determine the location # Missing airport codes that could not be determined, or events en route, were coded as 'UNKN'
+# States and cities that could not be determined were  coded as 'UNK'.
+
+# City names with city abbreviations like Ft. or St. had those abbreviations spelled out.
+# City names that were an air force base or naval air station kept the AFB or NAS abbreviation.
+
+# Resources for state and city identifiers included:
+#       - Google Maps
+#       - AirNav.com - https://www.airnav.com/airports/
+
+
+# Initial goal is to input data and do basic summary statistics
+
+# === END DATA CLEANING ===
+
+
+# ==== INPUT DATA ====
+# Input raw UAS data file
+# Raw data included are all 50 states, the District of Columbia, 
+# Puerto Rico, and several US territories.
+
+sightings = NULL
+sightings.raw = NULL
+sightings.raw = read.csv("http://www.airsafe.com/analyze/uas_events.csv")
+sightings=sightings.raw
+
+uas_summary = NULL
+uas_summary.raw = NULL
+uas_summary.raw = read.csv("http://www.airsafe.com/analyze/uas_registrations_summary.csv")
+uas_summary=uas_summary.raw
+
+# Input summary flight operations statistics
+
+# Converted to a CSV file and can be downloaded from:
+# http://www.airsafe.com/analyze/faa_opsnet_by_state_uas.csv
+
+
+flight.data = NULL
+flight.data.raw = NULL
+flight.data.raw = read.csv("http://www.airsafe.com/analyze/faa_opsnet_by_state_uas.csv")
+flight.data=flight.data.raw
+
+
+# === END INPUT DATA ===
+
+# === DEFINE US STATES AND TERRITORIES ===
+
+# The data for UAS registrations included US postal codes for overseas military mail that represents  
+#       areas outside of US territory. The simplifying assumption is
+#       that none of these registations are associated with UAS
+#       sightings in US territory.
+
+# R-provided vectors of state name and abbreviations include only the 50 states
+# Five more will be added
+extra.abb = c("AS", "DC", "GU", "MP", "PR", "VI")
+extra.name = c("American Samoa", "District of Columbia", "Guam", "Northern Mariana Islands",
+               "Puerto Rico", "U.S. Virgin Islands")
+
+# Now append them to the R-provided list of 50 state names and abbreviations
+every.abb = c(state.abb,extra.abb)
+every.state = c(state.name,extra.name)
+
+# === END DEFINE US STATES AND TERRITORIES ===
+
+# === DATA CLEANING ===
+
+# STEP 1: Only include unique ID and key features for further analysis
+# During initial cleaning before uploading, only the following columns will be analyzed further:
+#       "EventID", "Date", "State", "City", "Summary" 
+
+sightings =  sightings[, c("EventID", "Date", "State", "City", "Summary")]
+
+# STEP 2: Ensure that all of the variables are of type character
+# while making sure none of these are treated as factors
+sightings = data.frame(lapply(sightings,as.character), stringsAsFactors=FALSE)
+uas_summary = data.frame(lapply(uas_summary,as.character), stringsAsFactors=FALSE)
+flight.data = data.frame(lapply(flight.data,as.character), stringsAsFactors=FALSE)
+
+# STEP 3: Remove all leading and trailing spaces from selected variables
+# Using the function trimws removes leading and trailing space characters
+
+sightings = as.data.frame(apply(sightings, 2, trimws)) 
+uas_summary = as.data.frame(apply(uas_summary, 2, trimws)) 
+flight.data = as.data.frame(apply(flight.data, 2, trimws)) 
+
+# STEP 4: Name columns of flight.data data frame and
+#       Ensure flight data numbers are integers
+
+# Rename columns to  "State.abb" and "Total.Operations"
+colnames(flight.data) = c("State.abb", "Total.Operations")
+
+# Ensure that "Total.Operations" variable is numeric
+flight.data$Total.Operations = as.integer(as.character(flight.data$Total.Operations))
+
+# Ensure that "State.abb" variable is character
+flight.data$State.abb = as.character(flight.data$State.abb)
+
+# STEP 5: Remove unknown or blank location (City, State, or Airport) and time of day (Hour) from further analysis
+
+good.loc = sightings$Date!="UNK"  & sightings$State!="UNK" &  
+        sightings$City!="UNK"  & sightings$Summary!="UNK" & 
+        sightings$Date!=""  & sightings$State!="" &  
+        sightings$City!=""  & sightings$Summary!=""
+sightings=sightings[good.loc,]
+
+
+# STEP 6: Remove UAS encounters that are not in US territory
+
+# Eliminate any record that does not have a state name in this list
+
+
+# Rogue areas
+sightings = sightings[which(sightings$State %in% every.state),]
+
+
+# STEP 7: Add a column with full state names to sightings data frame
+# First create a column of NAs to sightings
+State_abb = rep(NA,nrow(sightings))
+insert.position = which(colnames(sightings)=="State")
+sightings = cbind(sightings[,1:insert.position],State_abb,sightings[,(insert.position+1):ncol(sightings)])
+
+# Now replace an NA value with an appropriate two-letter code.
+#       If not an appropriate state or territory name, remains as NA
+for (i in 1:nrow(sightings)) {
+        if(sightings$State[i] %in% every.state) {
+                sightings$State_abb[i] = every.abb[which(every.state == sightings$State[i])]
+        }
+}
+
+# STEP 8: Eliminate uas_summary records (registrations) from outside the US
+
+State_uas = rep(NA,nrow(uas_summary))
+uas_summary = cbind(State_uas,uas_summary)
+
+
+# Rouge locations
+# uas_summary$State_code[which(!uas_summary$State_code %in% every.abb)]
+
+uas_summary = uas_summary[which(uas_summary$State_code %in% every.abb),]
+
+
+# Ensure uas_summary state and state codes are character
+uas_summary$State_uas = as.character(uas_summary$State_uas)
+uas_summary$State_code = as.character(uas_summary$State_code)
+
+for (i in 1:nrow(uas_summary)) {
+        if(uas_summary$State_code[i] %in% every.abb) {
+                uas_summary$State_uas[i] = every.state[which(every.abb == uas_summary$State_code[i])]
+        }
+}
+
+# Ensure "State_code" and "State_uas: are a factor variables
+# uas_summary$State_code = as.factor(uas_summary$State_code)
+# uas_summary$State_uas = as.factor(uas_summary$State_uas)
+
+# === END DATA CLEANING ===
+
+
+# === DATE CONVERSION ===
+# Create new columns for year, month, and day
+sightings$Date = as.Date(sightings$Date, "%m/%d/%Y")
+
+sightings$Year = as.integer(format(as.Date(sightings$Date, format="%Y-%m-%d"),"%Y"))
+sightings$Day = as.integer(format(as.Date(sightings$Date, format="%Y-%m-%d"),"%d"))
+sightings$Month = month.abb[as.numeric(format(as.Date(sightings$Date, format="%Y-%m-%d"),"%m"))]
+sightings$Weekday = weekdays(as.Date(sightings$Date,"%Y-%m-%d"), abbreviate = TRUE)
+
+# ORDER DAY AND MONTH: Ordering days of the week and months of the year 
+
+# Make months and days of the week factors and order them as they are in a calendar
+sightings$Month = factor(sightings$Month,levels=c("Jan", "Feb","Mar", "Apr","May",
+                                                  "Jun","Jul","Aug","Sep","Oct", "Nov","Dec"), ordered=TRUE)
+
+sightings$Weekday = factor(sightings$Weekday,levels=c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"), ordered=TRUE)
+
+# Ensure "Summary" variable is character
+sightings$Summary = as.character(sightings$Summary )
+
+
+# Rearrange added colums
+date.col = which(colnames(sightings)=="Date")
+
+sightings = cbind(sightings[,1:date.col], sightings[,c("Year","Day","Month","Weekday")], sightings[,(date.col+1):(ncol(sightings)-4)])
+
+
+# === END DATE CONVERSION ===
+
+# === LIMIT DATE RANGE ===
+
+year.limit = sightings$Year > 2014 & sightings$Year < 2019
+
+# Limit sightings to 2015-2018
+sightings = sightings[year.limit,]
+
+# === END LIMIT DATE RANGE ===
+
+# === EXPAND UAS SUMMARY ===
+
+# Ensure numeric data is of type integer
+uas_summary$Hobbyist_Registrations = as.integer(as.character(uas_summary$Hobbyist_Registrations))
+uas_summary$Non_Hobbyist_Registrations = as.integer(as.character(uas_summary$Non_Hobbyist_Registrations))
+uas_summary$All_registrations = uas_summary$Hobbyist_Registrations + uas_summary$Non_Hobbyist_Registrations
+uas_summary$percent_commericial_to_hobbyist = format(100*(uas_summary$Non_Hobbyist_Registrations/uas_summary$All_registrations), digits = 3)
+
+# Add the total flgiht operations
+
+# First, add a column of NA values for "Total.Operations"
+uas_summary$Total.Operations = rep(NA,nrow(uas_summary))
+
+for (i in 1:nrow(uas_summary)) {
+        if(uas_summary$State_code[i] %in% flight.data$State.abb) {
+                uas_summary$Total.Operations[i] = flight.data$Total.Operations[which(flight.data$State.abb == uas_summary$State_code[i])]
+        }
+}
+
+
+
+# Areas without FAA OPSNET flights
+
+no.faa.opsnet = which(is.na(uas_summary$Total.Operations))
+#uas_summary$State_uas[no.faa.opsnet]
+
+# Update uas_summary to remove territories without traffic data
+uas_summary = uas_summary[which(!is.na(uas_summary$Total.Operations)),]
+
+
+
+# Add column for percent traffic
+uas_summary$Percent_traffic = 100*uas_summary$Total.Operations/sum(uas_summary$Total.Operations)
+
+# Add column for encounters and percent encounters
+
+uas_summary$Encounters = rep(NA,nrow(uas_summary)) 
+for (i in 1:nrow(uas_summary)) {
+        uas_summary$Encounters[i] = sum(sightings$State_abb == uas_summary$State_code[i] )
+     }
+uas_summary$Percent_encounters = 100*uas_summary$Encounters/sum(uas_summary$Encounters)
+
+# Add column for rate of encounters
+uas_summary$Encounter_rate = round(100000*(uas_summary$Encounters/uas_summary$Total.Operations), digits=2)
+
+# === END EXPAND UAS SUMMARY ===
+
+# Cleaned up data
+write.csv(sightings, file="uas_sightings_clean.csv")
+write.csv(uas_summary, file="uas_summary.csv")
+
+
+# === QUICK SUMMARY ===
+
+  
+date.range = as.numeric(as.Date(max(sightings$Date))) - as.numeric(as.Date(min(sightings$Date))) + 1
+year.range = date.range/365.25
+
+
+# Create a complete table and histogram of days with x-amount of UAS events
+#  by adding a vector of zero values equal to the number of days with no sightings or encounters
+
+# === END QUICK SUMMARY ===
+
+
+# === EXPLORATORY DATA ANALYSIS ===
+# UAS encounters by state and city
+
+# UAS ENCOUNTERS BY STATE
+state.tot = as.data.frame(table(sightings$State, useNA = "ifany")) 
+# Turns table output into a two-column data frame sorted alphabetically by state
+
+# Rename the columns for clarity
+colnames(state.tot) = c("State","Events") 
+
+# Ensure state variabe is of type character
+state.tot$State = as.character(state.tot$State)
+
+# UAS ENCOUNTERS BY CITY
+supercities =as.data.frame(sort(table(sightings$City), decreasing = TRUE) )
+colnames(supercities) = c("City","Encounters")
+
+# Daily encounter summary
+daily.encounters=c(rep(0,date.range-length(table(sightings$Date))),as.data.frame(table(sightings$Date))[,2])
+
+# === END EXPLORATORY DATA ANALYSIS ===
+
+# === RANKING BY OPERATIONS, ENCOUNTERS, AND RISK  ===
+
+# Some of the parts of the map of the continental US, particularly 
+# smaller states and the  District of Columbia, can't be seen easily, 
+# and areas outside the continental US are not visible at all, so will create
+# tables ranking by flight operations, encounters, and risk.
+
+# All US figures
+national.rate = round(sum(sightings$State_abb %in% uas_summary$State_code)/(sum(uas_summary$Total.Operations)/100000), digits = 2)
+
+
+
+
+# States and territories ordered by name
+state.data.ordered = uas_summary[order(uas_summary$State_code),c("State_code","Total.Operations", "Encounters","Encounter_rate")]
+# Rename the column$s for clarity
+colnames(state.data.ordered) = c("State","Operations (M)","Events", "Rate per 100K")
+
+# Scale number of flight operations
+state.data.ordered$`Operations (M)` = round(state.data.ordered$`Operations (M)` /1000000, digits=2)
+
+
+
+# === END RANKING BY OPERATIONS, ENCOUNTERS, AND RISK  ===
+
+```
+
+###Summary###  
+
+This study reviewed four years of reports (2015-2018) compiled by the Federal Aviation Administration (FAA) concerning encounters with Unmanned Aircraft Systems (UAS), commonly known as drones.
+
+This was a first cut at the data that looked primarily for the location that had a disprportionate share of reported UAS encounters relative to the magnitude of flight operationas in that location.
+
+Among the findings was that the rate of reported UAS encounter events varies widely across the US (the 50 states, the District of Columbia, Puerto Rico, Guam, and other US territories), and the highest rates occurred in the state of New York and Washington. 
+
+In addition to examining the reporting rates, some of the key insights included the following:
+
+- Across the US from 2015-2018, there were a total of `r format(nrow(sightings),big.mark = ",")` UAS sightings and `r round(sum(uas_summary$Total.Operations)/1000000, digits = 1)` million flights, giving an average rate of reported UAS encounters in the United States `r national.rate` per 100,000 air carrier flights. There were `r sum(uas_summary$Encounter_rate > national.rate)` states and territories with a higher UAS encounter rate. 
+
+- Over that four-year span, on any given day in the United States, there was a `r round((length(unique(sightings$Date))/date.range)*100, digits = 2)`% chance that at least one aircraft reported a potentially dangerous encounter with a UAS. In other words, in the `r format(date.range, big.mark=",")`-day period from 1 Janury 2015 to 31 December 2018, there were only `r date.range-length(table(sightings$Date))` days without at least one reported UAS encounter. 
+
+- There were an average of `r round(nrow(sightings)/date.range, digits=2)` UAS encounters per day, with as many as `r max(sort(table(sightings$Date)))` in a single day.
+
+- UAS encounters or events were more likely on Saturday and Sunday, and during the months of May, June, and July.
+
+- Among the 50 states, Puerto Rico, and the District of Columbia, the reported rate of reported encounters, measured by number of encounters per 100K flights, ranged from a low of 0.24 for Wyoming to a high of 9.38 for New York.
+
+###Background###
+Since 2016, when the FAA changed regulations making it much easier for indivuduals and businesses to use drones for commercial purposes, the use of drones has increased exponentially. Also, the FAA requires that all but the smallest drones have to be registered, and currently, there are over 1.5 million registered drones and over 150,000 certified drone pilots. 
+
+Unauthorized and potentially hazardous encounters with drones, which the FAA refers to as Unmanned Aircraft Systems (UAS), represent an ongoing risk to aviation, with UAS aircraft often flying in airspace where such operations are not allowed, and the reports of such activity have grown steadily during the study period.
+
+The FAA has taken several actions to reduce the occurrence of unauthorized flights through public education, including encouraging the public to report unauthorized drone operations to local law enforcement agencies, and by collecting and publishing reports of such activities ([available at https://www.faa.gov/uas/resources/public_records/uas_sightings_report/](https://www.faa.gov/uas/resources/public_records/uas_sightings_report/)). 
+
+###Focus of this study###
+While the FAA's published reports includes a wide range of information, this study will address the following general questions based on the most consistently recorded information, which is the date and location of the event: 
+
+- Which states or territories in the US have the highest rates of reported unauthorized or hazardous encounters between UAS and non-UAS aircraft.
+
+- What days of the week and months of the year are more likely to have unauthorized or hazardous encounters between UAS and non-UAS aircraft.
+
+###Air traffic data used in this study###
+Because this study focused on encounters between UAS aircraft and all other kinds of aircraft, air traffic data encompassing both civil and military aircraft was used to estimate the potential risks to the flying public. The data was taken from the [FAA's Operations Network (OPSNET)](https://aspm.faa.gov/opsnet/sys/Airport.asp) site, which compiles traffic data from all airports funded by the FAA. 
+
+###UAS registration data used in this study###
+The UAS registration data, which included registrations of individual UAS aircraft used for commerical purposes, as well as registrations of individuals who use drones for non-commercial purposes, was taken from the following file in the [FAA's FOIA Library](https://www.faa.gov/foia/electronic_reading_room/) -   [https://www.faa.gov/foia/electronic_reading_room/media/Registrations-City-State-Country-Count-2019Q3Q4.xlsx](https://www.faa.gov/foia/electronic_reading_room/media/Registrations-City-State-Country-Count-2019Q3Q4.xlsx).
+
+###Who is this report for?###
+This report may be useful for the following kinds of groups:
+
+* Anyone who wants to educate flight crews, airport authorities, law enforcement and other relevant groups as to the extent of the problem (This could be done just cutting and pasting the graphics and basic stats in the report).
+
+* Organizations that deal with regulations and policies related to the commercial use of Unmanned Aircraft Systems (drones).
+
+* Organizations currently involved in understanding or reducing aviation safety risks associated with inappropriate use of drones.
+
+* Organizations, especially law enforcement agencies that, that seek to understand the extent of the risks posed by unauthorized drone flights.
+
+###Preprocessed data and data dictionary###  
+
+After downloading and preprocessing the data, it was processed in order to summarize the likelihood of a UAS encounter by geographical area (specifially, US states and territorries), day of the week, and month of the year. UAS registration data and air traffic data, summarized by US state and territory, made up the balance of the raw data used in the study. 
+
+The preprocessed raw data used in this study, and the data dictionary that fully describes all the data used in this study, is available in the data dictionary for this study, located at [http://www.airsafe.com/analyze/uas_data_dictionary.pdf](http://www.airsafe.com/analyze/uas_data_dictionary.pdf)
+
+###Quick summary of the data###  
+
+- From 2015 to 2018, there were `r format(nrow(sightings), digits=5, big.mark = ",")` encounters between a UAS and a non-UAS aircraft at or near at least `r format(length(table(sightings$City)), big.mark = ",")`  airports or other locations.
+
+- During this four-year period, there was an average of `r round(nrow(sightings)/date.range, digits=2)` UAS encounters per day, with as many as `r  max(sort(table(sightings$Date)))` UAS encounters in a single day. The median number of daily UAS encounters was `r median(daily.encounters)`.
+
+- There were only `r date.range-length(table(sightings$Date))` days from the four-year period 2015-2018 with no reported UAS encounters in the United States. In other words, on any given day in the United States, there was a `r round((length(unique(sightings$Date))/date.range)*100, digits=2)`% chance that at least one aircraft will have a potentially dangerous encounter with a drone.
+
+Below are several summary graphics illustrating the distribution of UAS encounters by:
+
+- Distribution of daily reports
+- Year
+- Month
+- Day of the week 
+
+***
+
+```{r, echo=FALSE}
+cat('\n')
+# Create a complete table and histogram of days with x-amount of UAS events
+hist(daily.encounters, main="Figure 1: Distribution of daily UAS encounter reports",
+      xlab="Number of encounters in a day", breaks = seq(-1,25,by=1), include.lowest=TRUE, col="dodgerblue")
+```
+
+####Table 1: Statistical summary of the distribution of daily UAS encounter reports####
+```{r, echo=FALSE}
+cat('\n')
+summary(daily.encounters)
+cat('\n')
+```
+
+***
+```{r, echo=FALSE}
+# Reports by year
+barplot(table(sightings$Year), main= "Figure 2: UAS reports by year", xlab = "Year", ylab = "Events", col="dodgerblue")
+```
+
+####Table 2: UAS reports by year####
+```{r, echo=FALSE}
+
+table(sightings$Year)
+cat(paste("\n"))
+```
+***
+```{r, echo=FALSE}
+
+plot(sightings$Month, main = "Figure 3: UAS reports by month of the year", ylab = "Reports", xlab = "Month of the year", col="dodgerblue")
+```
+
+####Table 3: UAS reports by month of the year####
+```{r, echo=FALSE}
+
+table(sightings$Month)
+cat(paste("\n"))
+```
+
+***
+
+```{r, echo=FALSE}
+plot(sightings$Weekday, main = "Figure 4: UAS reports by day of the week", ylab = "Reports", xlab = "Day of the wek", col="dodgerblue")
+
+```
+
+####Table 4: Reported UAS encounters by day of the week####
+```{r, echo=FALSE}
+
+cat(paste("\n"))
+table(sightings$Weekday)
+cat(paste("\n"))
+
+```
+
+***
+####Testing for uniform distribution of UAS encounters####
+A chi-square test was used to test the null hypothesis that the UAS encounters were uniformly distributed by the day of the week or the month of the year. The null hypothesis was rejected in both cases because the p-value was much less than 0.05:
+
+- Day of the week p-value: `r format(chisq.test(table(sightings$Weekday))[[3]], digits=3)` 
+- Month of the year p-value:  `r format(chisq.test(table(sightings$Month))[[3]], digits=3)` 
+
+####Table 5: Distribution of UAS encounters by month and day of the week ####
+```{r, echo=FALSE}
+table(sightings$Month,sightings$Weekday)
+```
+
+As was the case when conducting a chi-square test on the distribution of UAS encounters by day of the week or month of the year, when considering the two together, the null hypothesis of a uniform distribution of UAS encounters by a combination of day of the week and month of the year would also be rejected (p-value of `r format(chisq.test(table(sightings$Month,sightings$Weekday))[[3]], digits=3)`. 
+
+While the chi-square test provides a straitforward mathematical measure of the level of uniformity of the distribution of UAS encounters, the lack of uniformity can also be illustrated visually, as will be shown below.
+
+###Using heat maps to illustrate relationships###  
+
+It is also possible to visually depict this non-uniform distribution using heat maps. The heat map would reflect the data in the previous table, with 84 cells representing a combination of the month and day of the week. The colors correspond to a level of intensity with white being on the low end of the scale and dark blue on the upper end.
+
+***
+####Heat map 1: Showing months with the most hits#### 
+There are three ways to display this heat map, all of which use the data in Table 1. In the first option, the darkest cell corresponds to the month of the year and day of the week with the most UAS encounters.  
+
+The map below shows that the four months of May, June, July, and August tend to have more UAS encounters, as do the weekend days of Saturday and Sunday.
+\newline
+\newline
+```{r, echo=FALSE}
+
+# Heat maps will use a color pallette that goes from white for lowest to dark blue for the highest value
+palette = colorRampPalette(c('#ffffff','#0000ff'))(64)
+
+# Create a heat map (#1) for combination of day of the week and month with no scaling.
+#       Scaling by row (the month)
+#       will highlight the day of the week with a relatively high or low number of spikes.
+#       The darkest cells correspond indicate that this combination of month and 
+#       day of the week had more UAS encounters than lighter colored cells.
+
+heatmap(table(sightings$Month, sightings$Weekday),Rowv=NA, Colv=NA,revC=TRUE, 
+        scale="none", col = palette, margins=c(4, 4), 
+        main="Figure 5: Unscaled UAS encounters",
+        xlab="Day of the week", ylab="Month of the year",
+        cexRow=0.9, cexCol=0.9)
+
+```
+
+***
+####Heat map 2: Showing days of the week with the most hits####
+By scaling the heat map by the row values (month of the year), the darker cells in each row correspond to the days of the week with the most UAS encounters. In other words, the scaling is done row by row, so that the darkest rectangle in each row correspends to the day with the most reported UAS encounters.
+
+This means that if a column (day of the week) is consistently darker, that means that the corresponding day of the week is more likely to have UAS encounters. Saturday and Sunday are not only darker than other days in this second heat map, they are consistently darker than was the case with the unscaled heat map.
+\newline
+\newline
+```{r, echo=FALSE}
+# Create a heat map (#2) for combination of day of the week and month that is scaled by the row (month of the year)
+
+heatmap(table(sightings$Month, sightings$Weekday),Rowv=NA, Colv=NA,revC=TRUE, 
+        scale="row", col = palette, margins=c(4, 4), 
+        main="Figure 6: UAS encounters scaled by month",
+        xlab="Day of the week", ylab="Month of the year",
+        cexRow=0.9, cexCol=0.9)
+
+
+```
+
+***
+####Heat map 3: Showing months of the year with the most hits####
+By scaling the heat map by the column values (day of the week), the darker cells in each column correspond to the months with the most UAS encounters, so if a row is consistently darker, that means that the corresponding month of the year is more likely to have UAS encounters.  
+
+This third heat map shows that the months of May through July have consistently higher levels of UAS encounter reports than the other months of the year. These months are also darker than in the first unscaled heat map. Unlike that first heat map, August is not as prominent.   
+\newline
+\newline
+```{r, echo=FALSE}
+# Create a heat map (#3) for combination of day of the week and month that is scaled by the column (day of the week). 
+
+heatmap(table(sightings$Month, sightings$Weekday),Rowv=NA, Colv=NA,revC=TRUE, 
+        scale="column", col = palette, margins=c(4, 4), 
+        main="Figure 7: UAS encounters scaled by weekday",
+        xlab="Day of the week", ylab="Month of the year",
+        cexRow=0.9, cexCol=0.9)
+
+```
+
+
+***
+###What the first three heat maps suggest###  
+
+Using the same table of data summarizing the distribution of UAS encounters by a combination of month of the year and day of the week, the three heat maps  highlighted the following:
+
+- Figure 5: The combination of month and day with relatively high numbers of UAS encounters.
+
+- Figure 6: The days of the week with consistently higher levels of UAS encounter throughout the year.
+
+- Figure 7: The months of the year with consistently higher levels of UAS encounter reports.
+
+The first heat map (Figures 5) suggest that Saturday and Sunday tend to have higher numbers of UAS encounter reports, a pattern that is made even more clearly by the second heat map (Figure 6) which is scaled by month.
+
+The last heat map (Figure 7) which is scaled by the day of the week shows that there is a greater likelihood of reports from the three month period from May to July.
+
+A review of the scaled and unscaled heat maps suggest that the scaled heat maps are preferable for exposing UAS encounter trends associated with particular days of the week or months of the year.
+
+###Illustrating relative risk of states and territories###  
+
+Risk can be defined as the product of a hazard (such as a hazardous flight operation) and the likelihood that this hazard occurs. In other words, (likelihood)x(hazard) = risk. In this study, the hazard is a UAS operating in unauthorized airspace and the likelihood is the rate of reported unauthorized flights of a UAS per 100,000 non-UAS flights.
+
+####State UAS encounter comparisons####
+For the US as a whole, there were `r format(nrow(sightings),big.mark = ",")` UAS sightings, `r round(sum(uas_summary$Total.Operations)/1000000, digits = 1)` million flights, and a rate of UAS encounters of `r national.rate` per 100K flights.  
+
+The following tables have information from all the states and territories orderd by:
+
+- State or territory name
+- Number of flight operations,
+- Number of UAS encounters, and 
+- Rate of UAS encounters  
+
+###Table 6: States and territories data ordered by name###  
+
+```{r, echo=FALSE}
+# States and territories ordered by name
+state.data.ordered = uas_summary[order(uas_summary$State_uas),c("State_uas","Total.Operations", "Encounters","Encounter_rate")]
+# Rename the columns for clarity
+colnames(state.data.ordered) = c("State","Operations (M)","Encounters", "Rate per 100K")
+
+# Scale number of flight operations
+state.data.ordered$`Operations (M)` = round(state.data.ordered$`Operations (M)` /1000000, digits=2)
+
+
+print.data.frame(state.data.ordered, row.names=FALSE, right = FALSE)
+
+```
+
+###Table 7: States and territories data ordered by flight operations###   
+
+```{r, echo=FALSE}
+state.data.ordered = state.data.ordered[order(state.data.ordered$`Operations (M)`, decreasing=TRUE),] 
+print.data.frame(state.data.ordered, row.names=FALSE, right = FALSE)
+
+```
+
+
+###Table 8: States and territories ordered by UAS encounters###  
+
+```{r, echo=FALSE}
+
+state.data.ordered = state.data.ordered[order(state.data.ordered$Encounters, decreasing=TRUE),] 
+print.data.frame(state.data.ordered, row.names=FALSE, right = FALSE)
+
+```
+
+
+###Table 9: States and territories data ordered by UAS encounter rate###  
+
+```{r, echo=FALSE}
+state.data.ordered = state.data.ordered[order(state.data.ordered$`Rate per 100K`, decreasing=TRUE),] 
+print.data.frame(state.data.ordered, row.names=FALSE, right = FALSE)
+
+
+```
+###Maps of states by traffic, encounters, and rates###   
+
+Most of the data that was listed in the three tables above can also be summarized below in the following three maps of the continental US, with the first one illustrating the disribution of air traffic by state, with darker areas representing a higher percentage of US air traffic.
+
+```{r, echo=FALSE}
+# === MAP GRAPHICS ===
+# Note that in ggplot2, the map function used here has the 48 states of the 
+# continental US plus the district of columbia
+# For the map displays used in this study, only data from those 48 states plus the
+# District of Columbia will be used to create the map data
+
+# Data from other areas, including Alaska, Hawaii, Guam, Northern Mariana Islands, 
+# Puerto Rico, American Samoa, and Virgin Islands, are printed in tables elsewhere.
+
+used.abb = setdiff(every.abb, c("AK", "HI", "GU", "MP", "PR", "VI", "AS"))
+used.state = setdiff(every.state, c("Alaska", "Hawaii", "Guam", 
+                                    "Northern Mariana Islands","Puerto Rico",
+                                    "U.S. Virgin Islands", "American Samoa"))
+
+# Now make the combination of state abbreviation and lowercase state name 
+# a data frame with column names "State.abb" and "State" and row names 
+# equal to the state name
+state.combo = as.data.frame(cbind(used.abb,used.state))
+rownames(state.combo) = used.state
+colnames(state.combo) = c("State.abb","State")
+
+# Ensure that both columns are characters
+state.combo$State = as.character(state.combo$State)
+state.combo$State.abb = as.character(state.combo$State.abb)
+
+# Will now merge do two sets of merges. 
+# The first will merge the data frames "state.tot" which has total UAS encounters
+# for each state with the "state.combo" which has the states that will be used in 
+# the maps. This will use the variable "State" to merge into a new "state.combo"
+state.combo = merge(state.tot,state.combo, by = "State")
+
+# will now add a new column representing the percent of all UAS events by state
+state.combo$Percent.events = 100*state.combo$Events/nrow(sightings)
+
+# The second merge will involve "state.tot" and "flight.data",
+# this time merging by the common variable "State.abb" into a new "state.combo"
+state.combo = merge(flight.data,state.combo, by = "State.abb")
+
+# Will add a column that shows the percent of operations by state
+state.combo$Percent.ops = 100*state.combo$Total.Operations/sum(state.combo$Total.Operations)
+
+# This combined data frame "state.combo" now has the data for the 48 states plus DC
+# An additional column will have a relative risk measure that is the ratio 
+# of the percentage of UAS events divided by the precentage of flight operarions
+# A state with a proportion of strikes greater than the proportion of flight 
+# operations (a ration greater than 1) would imply that this state has more strike
+# events per flight operation.
+state.combo$risk.ratio = state.combo$Percent.events/state.combo$Percent.ops
+
+
+
+
+# The following gets the state boundary data into a data frame
+# Regions happpen to be lower case state names
+states <- map_data("state") 
+
+# map_data is from ggplot2, creates data frame from information from the 
+# 'maps' package and each region of a state is one of the polygons making up that state
+# the data frame "states" has a column "region" which corresponds to the "States"
+# column in the "state.combo" data frame, so now will create a "regions" column to
+# allow a merging of "states" and "state.combo"
+state.combo$region = state.combo$State
+
+# ggplot2 likes their full state names (regions) in lower case, so the 
+# new "regions" column in state.combo will have values in lower case.
+state.combo$region = tolower(state.combo$region)
+
+
+# Each row corresponds to a state. 
+# Create a new variable called 'region' which is the lower case
+# version of each state name. 
+# Note that ggplot2 related variables use lower case of state
+# and the map of the states only includes 49 areas
+# corresponding to the 48 states in the continental US plus
+# the District of Columbia.
+#
+# Merging data frames "states" and "state.combo" by common variable "region")"
+# 
+# The merged data frame "chrono" has relevant UAS data in each state region
+# Note that because "states" has more rows than "state.combo", the
+# number of rows of the merged data.frame will match the 
+# data frame with the highest number of rows
+# In other words, nrow(<merged data frame>) = nrow(states) and
+# some of the data from the data frame with the smaller
+# number of rows will be duplicated.
+
+choro = merge(states, state.combo, sort = FALSE, by = "region")
+
+# In the 'states' data frame, each region has a unique number (variable 'order'),
+# from 1 to nrow(states). The line below reorders the rows by 'order' from 1 to 
+# nrow(choro). Note again that nrow(choro) = nrow(states)
+choro <- choro[order(choro$order), ]
+
+# Note that there are 50 states (regions) but 62 groups. 
+# ========
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Percent.ops, group=group))
+gg <- gg + labs(title = "Figure 8: Percent of flight operations by state", fill = "Pct flight ops",
+                x="Darker colors imply a higher percentage of flight operations", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+
+```
+
+
+***
+
+###Percentage of UAS encounters###  
+The second map illustrates the disribution of UAS encounter reports by state, with darker areas representing a higher percentage of reports.  
+
+```{r, echo=FALSE}
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=Percent.events, group=group))
+gg <- gg + labs(title = "Figure 9: Percent of UAS encounters by state",  fill = "Pct UAS encounters",
+                x="Darker colors imply a greater percentage of UAS encounters", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+```
+
+###Ratio of UAS encounter to air traffic###   
+The third map illustrates the ratio of the percentage of UAS encouters to the percentage of reports, with darker areas representing states or territories with a disproportionately high rate of reports given the underlying air traffic.  
+
+```{r, echo=FALSE}
+gg <- ggplot(choro,   aes(x=long, y=lat)) + geom_polygon(aes(fill=risk.ratio, group=group))
+gg <- gg + labs(title = "Figure 10: Relative risk UAS encounters", 
+                x="Darker colors imply a disproportionately high rate of UAS encounters",  fill = "Risk ratio", y=NULL)
+gg = gg + theme(panel.border = element_blank()) # Get rid of lat/long background lines
+gg = gg + theme(panel.background = element_blank()) # Get rid of default gray background
+gg = gg + theme(axis.ticks = element_blank()) # Get rid of axis tic marks
+gg = gg + theme(axis.text = element_blank()) # Ge rid of axis titles (lat and long values)
+gg = gg + theme(plot.title = element_text(size = 19)) # Control font size of title
+gg = gg + scale_fill_gradient(low="#e6eeff", high="#022b7e") # Control the fill (state) color
+gg
+
+```
+
+
+*** 
+####Key issue when comparing state UAS encounter rates####
+The issue to keep in mind when comparing encounter rates of states and territories is that risks are associated with areas that have the highest potential for encounters, and those areas may be in only a portion of a state, or spread over several states.
+
+One area that clearly stands out in this respect, both in Table 9 that ranks states by UAS encounter rates and visually in Figure 10  would be the New York metropolitan area, which includes portions of western Long Island and northeast New Jersey. This area has four airports, LaGuardia and JFK in New York, and Teterboro and Newark in New Jersey, that not only have large amounts of airline and commercial air traffic, but also have a number of approach and departure routes that overfly or fly very close to congested urban areas.
+
+The District of Columbia is another region that ranks high in Table 9, but becuase of its size is not at all noticiable in the Figure 10 map. In both areas, further investigation of these two areas would likely identify the elements that lead to their relatively high encounter rates.
+
+###Discussion###  
+
+The UAS encounter data collected by the FAA represents an important resource for understanding the kinds of current and future risks that aircraft face from unauthorized or hazardous UAS activity This study was focused on the distribution of UAS encounters and how visual summaries such as heat maps can be used in conjunction with statistical measurements to communicate the scale and scope of the problem.
+
+The raw data provided by the FAA required further processing before it could used in this study, and that data cleaning processed revealed a number of issues with the data collection process, including inconsistencies in how airport identifiers are used. 
+
+The patterns of UAS encounters revealed in this analysis suggested that likelihood of encounters strongly related to  the day of the week or the month of the year. Also, while the UAS encounter rate is significantly higher than the national average for some parts of the US, particularly the New York metropolitan area, the risk is present throughout the country.
+
+While one could speculate about factors that led to the differences in UAS encounter rates, without additional information, the fact that the differences are sometimes an order of magnitude or more between different geographical areas is perhap reason enough to further investigate this scale and scope of the risk.
+
+
+###Resources###  
+
+Air Traffic Activity System (FAA)   https://aspm.faa.gov/opsnet/sys/Airport.asp
+
+sUAS Registry Enrollments and Registrants  
+https://www.faa.gov/foia/electronic_reading_room/media/Registrations-City-State-Country-Count-2019Q3Q4.xlsx 
+
+UAS Sightings reports (FAA)  
+https://www.faa.gov/uas/resources/public_records/uas_sightings_report/
+
+URL of this study    
+http://www.airsafe.com/analyze/uas_sightings.html
+
+Data dictionary for this study http://www.airsafe.com/analyze/uas_data_dictionary.pdf
+
+R code for this study 
+https://github.com/airsafe/analyses/blob/master/uas_sightings.Rmd
