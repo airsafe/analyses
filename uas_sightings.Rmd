@@ -874,9 +874,10 @@ While one could speculate about factors that led to the differences in UAS encou
 
 ###Resources###  
 
-Air Traffic Activity System (FAA)   https://aspm.faa.gov/opsnet/sys/Airport.asp
+Air Traffic Activity System (FAA)   
+https://aspm.faa.gov/opsnet/sys/Airport.asp
 
-sUAS Registry Enrollments and Registrants  
+sUAS Registry Enrollments and Registrants (FAA)    
 https://www.faa.gov/foia/electronic_reading_room/media/Registrations-City-State-Country-Count-2019Q3Q4.xlsx 
 
 UAS Sightings reports (FAA)  
@@ -885,7 +886,8 @@ https://www.faa.gov/uas/resources/public_records/uas_sightings_report/
 URL of this study    
 http://www.airsafe.com/analyze/uas_sightings.html
 
-Data dictionary for this study http://www.airsafe.com/analyze/uas_data_dictionary.pdf
+Data dictionary for this study 
+http://www.airsafe.com/analyze/uas_data_dictionary.pdf
 
 R code for this study 
 https://github.com/airsafe/analyses/blob/master/uas_sightings.Rmd
